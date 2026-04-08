@@ -15,9 +15,9 @@ Repositorio de la materia Ingeniería y Calidad de Software, año 2026, primer c
 | López Mora, Francisco         | 96274  | [franciscolopezmora3@gmail.com](mailto:franciscolopezmora3@gmail.com)           |
 | Iturriza, Mariano             | 415324 | [marianoiturriza01@gmail.com](mailto:marianoiturriza01@gmail.com)               |
 
-## 📄Estrucura del repositorio
-# ISW - G8 - 4K4 - 2026
+## 📁 Estructura del repositorio
 
+```bash
 ISW_G8_4K4_2026
 ├── Material de clase
 │   ├── Bibliografía
@@ -31,10 +31,10 @@ ISW_G8_4K4_2026
 │   ├── Guías
 │   ├── Planificación
 │   ├── Templates
-|   ├── Resumenes
+│   ├── Resumenes
 │   └── Programa de la Asignatura
 └── Trabajos Prácticos
-
+```
 ## ⚙️Configuración del repositorio
 
 | Ítem de Configuración     | Regla de Nombrado                                | Ubicación Física                                                                                           | Tipo de Ítem            |
@@ -43,7 +43,7 @@ ISW_G8_4K4_2026
 | Guías                    | Guia_<Tema>.pdf                                 | ISW_G8_4K4_2026/Material de clase/Guías/                                                                   | Recurso de la Cátedra    |
 | Filminas                 | PPT_<N>_<Tema>.pdf                              | ISW_G8_4K4_2026/Material de clase/Presentaciones Teóricas/Parcial <N>/Filminas/                            | Recurso de la Cátedra    |
 | Notas de clases grupales | Nota_<N>_<Tema>_<Fecha>.pdf                     | ISW_G8_4K4_2026/Material de clase/Presentaciones Teóricas/Parcial <N>/Notas de clases grupales/           | Material Propio          |
-| Planificación            | Planificacion_<Nomble>.pdf                       | ISW_G8_4K4_2026/Material de clase/Planificación/                                                           | Material Propio          |
+| Planificación            | Planificacion_<Nomble>.pdf                       | ISW_G8_4K4_2026/Material de clase/Planificación/                                                           | Recurso de la Cátedra           |
 | Templates                | Template_<Nombre>.<ext>                         | ISW_G8_4K4_2026/Material de clase/Templates/                                                               | Recurso de la Cátedra    |
 | Resúmenes                | Resumen_<Nombre>.pdf                              | ISW_G8_4K4_2026/Material de clase/Resumenes/                                                               | Material Propio          |
 | Programa de la Asignatura| Programa_Asignatura_ISW2026.pdf                 | ISW_G8_4K4_2026/Material de clase/Programa de la Asignatura/                                               | Recurso de la Cátedra    |
