@@ -9,5 +9,4 @@
 | CI-05 | Planificación | Recurso de la Cátedra | v1.0 | Gonzalez, Melisa Alejandra | Activo | Material de clase/Planificación/ | Cronogramas y planificación académica de la materia. |
 | CI-06 | Templates | Recurso de la Cátedra | v1.0 | Figueroa Prada, Juan Uriel | Activo | Material de clase/Templates/ | Plantillas oficiales para entregables y documentos. |
 | CI-07 | Resúmenes | Material Propio | v1.0 | Iturriza, Mariano | Activo | Material de clase/Resumenes/ | Resúmenes temáticos realizados por el grupo. |
-| CI-08 | Programa de la Asignatura | Recurso de la Cátedra | v1.0 | Peveraro, Fabrizio | Activo | Material de clase/Programa de la Asignatura/ | Programa oficial de contenidos y condiciones de cursado. |
-| CI-09 | Trabajos Prácticos | Material Propio | v1.0 | López Mora, Francisco | Activo | Trabajos Prácticos/ | Entregas de trabajos prácticos y sus revisiones. |
+| CI-08 | Trabajos Prácticos | Material Propio | v1.0 | López Mora, Francisco | Activo | Trabajos Prácticos/ | Entregas de trabajos prácticos y sus revisiones. |
