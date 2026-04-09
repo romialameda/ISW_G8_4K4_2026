@@ -35,7 +35,7 @@ ISW_G8_4K4_2026
 │   └── Programa de la Asignatura
 └── Trabajos Prácticos
 ```
-## ⚙️Configuración del repositorio
+## ⚙️ Configuración del repositorio
 
 | Ítem de Configuración     | Regla de Nombrado                                | Ubicación Física                                                                                           | Tipo de Ítem            |
 |--------------------------|--------------------------------------------------|-------------------------------------------------------------------------------------------------------------|--------------------------|
@@ -43,8 +43,25 @@ ISW_G8_4K4_2026
 | Guías                    | Guia_<Tema>.pdf                                 | ISW_G8_4K4_2026/Material de clase/Guías/                                                                   | Recurso de la Cátedra    |
 | Filminas                 | PPT_<N>_<Tema>.pdf                              | ISW_G8_4K4_2026/Material de clase/Presentaciones Teóricas/Parcial <N>/Filminas/                            | Recurso de la Cátedra    |
 | Notas de clases grupales | Nota_<N>_<Tema>_<Fecha>.pdf                     | ISW_G8_4K4_2026/Material de clase/Presentaciones Teóricas/Parcial <N>/Notas de clases grupales/           | Material Propio          |
-| Planificación            | Planificacion_<Nomble>.pdf                       | ISW_G8_4K4_2026/Material de clase/Planificación/                                                           | Recurso de la Cátedra           |
+| Planificación            | Planificacion_<Nombre>.pdf                      | ISW_G8_4K4_2026/Material de clase/Planificación/                                                           | Recurso de la Cátedra    |
 | Templates                | Template_<Nombre>.<ext>                         | ISW_G8_4K4_2026/Material de clase/Templates/                                                               | Recurso de la Cátedra    |
-| Resúmenes                | Resumen_<Nombre>.pdf                              | ISW_G8_4K4_2026/Material de clase/Resumenes/                                                               | Material Propio          |
+| Resúmenes                | Resumen_<Nombre>.pdf                            | ISW_G8_4K4_2026/Material de clase/Resumenes/                                                               | Material Propio          |
 | Programa de la Asignatura| Programa_Asignatura_ISW2026.pdf                 | ISW_G8_4K4_2026/Material de clase/Programa de la Asignatura/                                               | Recurso de la Cátedra    |
 | Trabajos Prácticos       | TP\<N>_\<M>_\<Tema>_\<TipoDeResolucion>_\<Fecha>.\<ext> | ISW_G8_4K4_2026/Trabajos Prácticos/                                                                       | Material Propio          |
+
+## 🧱 Criterio para crear Línea Base
+
+Se crea una Línea Base cuando se cumplen todas estas condiciones:
+
+1. Los ítems de configuración definidos para una entrega están en su ubicación correspondiente.
+2. Existe al menos un commit por integrante del grupo durante el período de trabajo de esa entrega.
+3. La tabla de ítems de configuración en `Descripcion_CI.md` está actualizada.
+4. Se realizó revisión grupal y aprobación de la versión a congelar.
+
+## 🏷️ Convención de versionado y tags de Línea Base
+
+- Formato de tag: `LB-AAAAMMDD-vN`
+- Ejemplo primera línea base: `LB-20260409-v1`
+- Regla de incremento:
+  - `v1`: primera línea base aprobada.
+  - `vN+1`: nueva línea base al cerrar una iteración relevante de la materia.
