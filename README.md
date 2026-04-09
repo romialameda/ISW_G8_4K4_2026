@@ -45,7 +45,6 @@ ISW_G8_4K4_2026
 | Planificación            | `Planificacion_<Nombre>.<ext>`                    | ISW_G8_4K4_2026/Material de clase/Planificación/                                                           | Recurso de la Cátedra    |
 | Templates                | `Template_<Nombre>.<ext>`                       | ISW_G8_4K4_2026/Material de clase/Templates/                                                               | Recurso de la Cátedra    |
 | Resúmenes                | `Resumen_<Nombre>.pdf`                          | ISW_G8_4K4_2026/Material de clase/Resumenes/                                                               | Material Propio          |
-| Programa de la Asignatura| `Programa_Asignatura_ISW2026.pdf`               | ISW_G8_4K4_2026/Material de clase/                                               | Recurso de la Cátedra    |
 | Trabajos Prácticos       | `TP_<N>_<M>_<Tema>_<TipoDeResolucion>_<Fecha>.<ext>` | ISW_G8_4K4_2026/Trabajos Prácticos/                                                                  | Material Propio          |
 
 ## 🧱 Criterio para crear Línea Base
