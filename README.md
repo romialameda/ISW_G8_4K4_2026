@@ -39,15 +39,15 @@ ISW_G8_4K4_2026
 
 | Ítem de Configuración     | Regla de Nombrado                                | Ubicación Física                                                                                           | Tipo de Ítem            |
 |--------------------------|--------------------------------------------------|-------------------------------------------------------------------------------------------------------------|--------------------------|
-| Bibliografía             | <Nombre_Material>-<Autor>.pdf                   | ISW_G8_4K4_2026/Material de clase/Bibliografía/                                                            | Recurso de la Cátedra    |
-| Guías                    | Guia_<Tema>.pdf                                 | ISW_G8_4K4_2026/Material de clase/Guías/                                                                   | Recurso de la Cátedra    |
-| Filminas                 | PPT_<N>_<Tema>.pdf                              | ISW_G8_4K4_2026/Material de clase/Presentaciones Teóricas/Parcial <N>/Filminas/                            | Recurso de la Cátedra    |
-| Notas de clases grupales | Nota_<N>_<Tema>_<Fecha>.pdf                     | ISW_G8_4K4_2026/Material de clase/Presentaciones Teóricas/Parcial <N>/Notas de clases grupales/           | Material Propio          |
-| Planificación            | Planificacion_<Nombre>.pdf                      | ISW_G8_4K4_2026/Material de clase/Planificación/                                                           | Recurso de la Cátedra    |
-| Templates                | Template_<Nombre>.<ext>                         | ISW_G8_4K4_2026/Material de clase/Templates/                                                               | Recurso de la Cátedra    |
-| Resúmenes                | Resumen_<Nombre>.pdf                            | ISW_G8_4K4_2026/Material de clase/Resumenes/                                                               | Material Propio          |
-| Programa de la Asignatura| Programa_Asignatura_ISW2026.pdf                 | ISW_G8_4K4_2026/Material de clase/Programa de la Asignatura/                                               | Recurso de la Cátedra    |
-| Trabajos Prácticos       | TP\<N>_\<M>_\<Tema>_\<TipoDeResolucion>_\<Fecha>.\<ext> | ISW_G8_4K4_2026/Trabajos Prácticos/                                                                       | Material Propio          |
+| Bibliografía             | `<Nombre_Material>-<Autor>.pdf`                 | ISW_G8_4K4_2026/Material de clase/Bibliografía/                                                            | Recurso de la Cátedra    |
+| Guías                    | `Guia_<Tema>.pdf`                               | ISW_G8_4K4_2026/Material de clase/Guías/                                                                   | Recurso de la Cátedra    |
+| Filminas                 | `PPT_<N>_<Tema>.pdf`                            | ISW_G8_4K4_2026/Material de clase/Presentaciones Teóricas/Parcial <N>/Filminas/                           | Recurso de la Cátedra    |
+| Notas de clases grupales | `Nota_<N>_<Tema>_<Fecha>.pdf`                   | ISW_G8_4K4_2026/Material de clase/Presentaciones Teóricas/Parcial <N>/Notas de clases grupales/          | Material Propio          |
+| Planificación            | `Planificacion_<Nombre>.pdf`                    | ISW_G8_4K4_2026/Material de clase/Planificación/                                                           | Recurso de la Cátedra    |
+| Templates                | `Template_<Nombre>.<ext>`                       | ISW_G8_4K4_2026/Material de clase/Templates/                                                               | Recurso de la Cátedra    |
+| Resúmenes                | `Resumen_<Nombre>.pdf`                          | ISW_G8_4K4_2026/Material de clase/Resumenes/                                                               | Material Propio          |
+| Programa de la Asignatura| `Programa_Asignatura_ISW2026.pdf`               | ISW_G8_4K4_2026/Material de clase/Programa de la Asignatura/                                               | Recurso de la Cátedra    |
+| Trabajos Prácticos       | `TP_<N>_<M>_<Tema>_<TipoDeResolucion>_<Fecha>.<ext>` | ISW_G8_4K4_2026/Trabajos Prácticos/                                                                  | Material Propio          |
 
 ## 🧱 Criterio para crear Línea Base
 
