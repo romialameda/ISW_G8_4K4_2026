@@ -31,8 +31,7 @@ ISW_G8_4K4_2026
 │   ├── Guías
 │   ├── Planificación
 │   ├── Templates
-│   ├── Resumenes
-│   └── Programa de la Asignatura
+│   └── Resumenes
 └── Trabajos Prácticos
 ```
 ## ⚙️ Configuración del repositorio
