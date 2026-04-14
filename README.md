@@ -57,14 +57,14 @@ ISW_G8_4K4_2026
 
 | SIGLA / Término        | SIGNIFICADO                                                                 |
 |-----------------------|-----------------------------------------------------------------------------|
-| <N>                   | Número incremental (Ej: 00, 01, n, etc.)                                    |
-| <M>                   | Número incremental independiente de N dentro del mismo ítem                 |
-| <Tema>                | Título del tema correspondiente                                             |
-| <Nombre>              | Nombre del material correspondiente                                         |
-| <Nombre_Material>     | Título del libro o paper de bibliografía                                    |
-| <Fecha>               | Fecha de la clase (formato: dd-mm-aaaa)                                     |
-| <ext>                 | Extensión del archivo del ítem de configuración                             |
-| <TipoDeResolucion>    | Tipo de resolución: ResolucionPropia o ResolucionDeClase                    |
+| `<N>`                 | Número incremental (Ej: 00, 01, n, etc.)                                    |
+| `<M>`                 | Número incremental independiente de N dentro del mismo ítem                 |
+| `<Tema>`              | Título del tema correspondiente                                             |
+| `<Nombre>`            | Nombre del material correspondiente                                         |
+| `<Nombre_Material>`   | Título del libro o paper de bibliografía                                    |
+| `<Fecha>`             | Fecha de la clase (formato: dd-mm-aaaa)                                     |
+| `<ext>`               | Extensión del archivo del ítem de configuración                             |
+| `<TipoDeResolucion>`  | ResolucionPropia o ResolucionDeClase                                        |
 | ISW                   | Ingeniería y Calidad de Software                                            |
 | SCM                   | Software Configuration Management                                           |
 | TDD                   | Test Driven Development                                                     |
