@@ -21,6 +21,12 @@ Repositorio de la materia Ingeniería y Calidad de Software, año 2026, primer c
 ISW_G8_4K4_2026
 ├── Material de clase
 │   ├── Bibliografía
+│   │   ├── Agilismo
+│   │   ├── Ingenieria de Software
+│   │   ├── Lean y Kanban
+│   │   ├── SCM \(Gestion de Configuracion de Software\)
+│   │   ├── TDD \(Test Driven Development\)
+│   │   └── Testing de Software
 │   ├── Presentaciones Teóricas
 │   │   ├── Parcial 1
 │   │   │   ├── Notas de clases grupales
