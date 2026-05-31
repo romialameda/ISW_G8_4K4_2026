@@ -79,6 +79,7 @@ export class InscripcionService {
       emailContacto,
     });
     inscripcion.confirmar();
+    await this.actividadRepository.save(actividad);
     await this.inscripcionRepository.save(inscripcion);
 
     // ─── 7. Enviar email de confirmación (side-effect) ────────────────────

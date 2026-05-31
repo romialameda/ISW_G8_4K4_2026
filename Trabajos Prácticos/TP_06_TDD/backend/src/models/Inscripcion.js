@@ -15,5 +15,6 @@ export class Inscripcion {
 
   confirmar() {
     this.confirmada = true;
+    this.horario.reservarCupo(this.visitantes.length);
   }
 }

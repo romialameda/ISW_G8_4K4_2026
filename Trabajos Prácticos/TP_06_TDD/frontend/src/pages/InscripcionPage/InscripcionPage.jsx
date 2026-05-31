@@ -116,6 +116,37 @@ export default function InscripcionPage() {
         totalVisitantes: visitantes.length,
         emailContacto,
       });
+
+      // Actualizar localmente el cupo para feedback inmediato
+      setActividades(prevActividades => 
+        prevActividades.map(act => {
+          if (act.nombre === actividadSel.nombre) {
+            return {
+              ...act,
+              horarios: act.horarios.map(h => {
+                if (h.hora === horarioSel) {
+                  const nuevosCupos = Math.max(0, h.cuposDisponibles - visitantes.length);
+                  return {
+                    ...h,
+                    cuposDisponibles: nuevosCupos,
+                    disponible: h.activo && nuevosCupos > 0
+                  };
+                }
+                return h;
+              })
+            };
+          }
+          return act;
+        })
+      );
+
+      // Recargar desde el servidor para estar 100% sincronizados
+      try {
+        const data = await getActividades();
+        setActividades(enriquecerActividades(data));
+      } catch (fetchErr) {
+        console.error('[API] Error al refrescar actividades:', fetchErr);
+      }
     } catch (err) {
       // El backend devuelve err.name como el tipo de error de dominio
       setError(ERROR_MENSAJES[err.name] ?? `❌ ${err.message}`);

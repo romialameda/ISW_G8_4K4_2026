@@ -46,6 +46,7 @@ function crearRepoActividad({
   return {
     // Stub: devuelve la actividad fake como si viniera de la DB (async)
     findByNombre: jest.fn().mockResolvedValue(actividadFake),
+    save: jest.fn().mockResolvedValue(actividadFake),
   };
 }
 
@@ -107,6 +108,7 @@ describe('InscripcionService — inscribir()', () => {
 
       // 4. Se persistió en la DB
       expect(inscripcionRepo.save).toHaveBeenCalledTimes(1);
+      expect(actividadRepo.save).toHaveBeenCalledTimes(1);
 
       // 5. Se envió el email de confirmación (verificación de interacción)
       expect(emailSender.enviar).toHaveBeenCalledTimes(1);

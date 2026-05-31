@@ -75,4 +75,32 @@ export class ActividadRepository {
     const docs = await this._col.findAll();
     return docs.map(d => d.nombre);
   }
+
+  /**
+   * Guarda o actualiza una actividad en la base de datos (colección en memoria).
+   * Mapea la instancia de Actividad de vuelta a un documento plano.
+   * @param {import('../models/Actividad.js').Actividad} actividad
+   * @returns {Promise<import('../models/Actividad.js').Actividad>}
+   */
+  async save(actividad) {
+    const doc = await this._col.findOne(item => item.id === actividad.id);
+    const docPlano = {
+      id: actividad.id,
+      nombre: actividad.nombre,
+      requiereTalle: actividad.requiereTalle,
+      terminosYCondiciones: actividad.terminosYCondiciones,
+      horarios: actividad.horarios.map(h => ({
+        hora: h.hora,
+        cuposDisponibles: h.cuposDisponibles,
+        activo: h.activo,
+      })),
+    };
+
+    if (doc) {
+      Object.assign(doc, docPlano);
+    } else {
+      await this._col.insertOne(docPlano);
+    }
+    return actividad;
+  }
 }

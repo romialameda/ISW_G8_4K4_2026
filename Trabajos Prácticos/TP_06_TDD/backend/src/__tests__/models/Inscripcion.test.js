@@ -4,11 +4,12 @@
  */
 import { describe, it, expect } from '@jest/globals';
 import { Inscripcion } from '../../models/Inscripcion.js';
+import { Horario } from '../../models/Horario.js';
 
 describe('Inscripcion — Modelo de dominio', () => {
 
   const actividadFake = { nombre: 'Tirolesa', requiereTalle: true };
-  const horarioFake   = { hora: '10:00', cuposDisponibles: 5, activo: true };
+  const horarioFake   = new Horario({ hora: '10:00', cuposDisponibles: 5, activo: true });
   const visitantesFake = [{ nombre: 'Ana', dni: '12345678', edad: 25, talle: 'M' }];
 
   const datosBase = () => ({
