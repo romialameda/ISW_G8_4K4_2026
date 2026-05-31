@@ -16,6 +16,8 @@ const DOMAIN_ERROR_HTTP = {
   ErrorActividadNoValida:    400,
   ErrorHorarioNoDisponible:  400,
   ErrorSinCupos:             409,
+  ErrorSinParticipantes:     422,
+  ErrorDatosVisitanteIncompletos: 422,
   ErrorTerminosNoAceptados:  422,
   ErrorTalleRequerido:       422,
 };

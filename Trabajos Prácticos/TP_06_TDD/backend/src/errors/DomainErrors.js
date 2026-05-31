@@ -35,6 +35,22 @@ export class ErrorTalleRequerido extends Error {
   }
 }
 
+/** CA: "Debe indicar la cantidad de personas que participaran de la actividad" */
+export class ErrorSinParticipantes extends Error {
+  constructor() {
+    super('Debe indicar al menos una persona para realizar la inscripción.');
+    this.name = 'ErrorSinParticipantes';
+  }
+}
+
+/** CA: "Para cada persona ... debe ingresar nombre, DNI y edad" */
+export class ErrorDatosVisitanteIncompletos extends Error {
+  constructor() {
+    super('Cada visitante debe tener nombre, DNI y edad para completar la inscripción.');
+    this.name = 'ErrorDatosVisitanteIncompletos';
+  }
+}
+
 /** CA: "seleccionar una actividad del conjunto de actividades" */
 export class ErrorActividadNoValida extends Error {
   constructor(actividad) {

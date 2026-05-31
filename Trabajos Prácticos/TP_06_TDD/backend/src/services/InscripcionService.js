@@ -11,6 +11,7 @@ import { Visitante } from '../models/Visitante.js';
 import {
   ErrorSinCupos,
   ErrorHorarioNoDisponible,
+  ErrorSinParticipantes,
   ErrorTerminosNoAceptados,
   ErrorActividadNoValida,
 } from '../errors/DomainErrors.js';
@@ -36,10 +37,14 @@ export class InscripcionService {
     const {
       actividad: nombreActividad,
       horario: horaSeleccionada,
-      visitantes: datosVisitantes,
+      visitantes: datosVisitantes = [],
       terminosAceptados,
       emailContacto,
     } = solicitud;
+
+    if (!Array.isArray(datosVisitantes) || datosVisitantes.length === 0) {
+      throw new ErrorSinParticipantes();
+    }
 
     // ─── 1. Buscar actividad en la DB (async) ────────────────────────────
     const actividad = await this.actividadRepository.findByNombre(nombreActividad);

@@ -1,7 +1,10 @@
 /**
  * Visitante.js — Entidad de Dominio (ESM)
  */
-import { ErrorTalleRequerido } from '../errors/DomainErrors.js';
+import {
+  ErrorDatosVisitanteIncompletos,
+  ErrorTalleRequerido,
+} from '../errors/DomainErrors.js';
 
 export class Visitante {
   constructor({ nombre, dni, edad, talle }) {
@@ -17,6 +20,10 @@ export class Visitante {
    * @throws {ErrorTalleRequerido}
    */
   validarParaActividad(actividad) {
+    if (!this.nombre?.trim() || !this.dni?.trim() || this.edad === '' || this.edad === null || this.edad === undefined) {
+      throw new ErrorDatosVisitanteIncompletos();
+    }
+
     if (actividad.requiereTalle && !this.talle) {
       throw new ErrorTalleRequerido(actividad.nombre);
     }
