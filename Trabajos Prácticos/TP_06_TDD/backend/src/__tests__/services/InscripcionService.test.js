@@ -3,6 +3,7 @@ import { InscripcionService } from '../../services/InscripcionService.js';
 import { Actividad } from '../../models/Actividad.js';
 import { Horario } from '../../models/Horario.js';
 import {
+  ErrorActividadNoValida,
   ErrorDatosVisitanteIncompletos,
   ErrorHorarioNoDisponible,
   ErrorSinCupos,
@@ -41,6 +42,13 @@ function crearRepoInscripcion() {
 function crearEmailSender() {
   return {
     enviar: jest.fn().mockResolvedValue({ enviado: true }),
+  };
+}
+
+function crearRepoActividadInvalida() {
+  return {
+    findByNombre: jest.fn().mockResolvedValue(null),
+    save: jest.fn(),
   };
 }
 
@@ -152,6 +160,26 @@ describe('InscripcionService.inscribir', () => {
     expect(emailSender.enviar).not.toHaveBeenCalled();
   });
 
+  it('lanza ErrorHorarioNoDisponible cuando el horario no existe en la actividad', async () => {
+    const emailSender = crearEmailSender();
+    const actividadRepo = crearRepoActividad({ nombre: 'Tirolesa', hora: '12:00', cuposDisponibles: 10 });
+    const inscripcionRepo = crearRepoInscripcion();
+    const service = new InscripcionService(emailSender, actividadRepo, inscripcionRepo);
+
+    await expect(
+      service.inscribir({
+        actividad: 'Tirolesa',
+        horario: '10:00',
+        visitantes: [{ nombre: 'Pedro', dni: '44444444', edad: 28, talle: 'XL' }],
+        terminosAceptados: true,
+        emailContacto: 'pedro@email.com',
+      }),
+    ).rejects.toThrow(ErrorHorarioNoDisponible);
+
+    expect(inscripcionRepo.save).not.toHaveBeenCalled();
+    expect(emailSender.enviar).not.toHaveBeenCalled();
+  });
+
   it('lanza ErrorTerminosNoAceptados cuando no se aceptan los terminos', async () => {
     const emailSender = crearEmailSender();
     const actividadRepo = crearRepoActividad();
@@ -227,6 +255,26 @@ describe('InscripcionService.inscribir', () => {
         emailContacto: 'contacto@email.com',
       }),
     ).rejects.toThrow(ErrorDatosVisitanteIncompletos);
+
+    expect(inscripcionRepo.save).not.toHaveBeenCalled();
+    expect(emailSender.enviar).not.toHaveBeenCalled();
+  });
+
+  it('lanza ErrorActividadNoValida cuando la actividad no existe', async () => {
+    const emailSender = crearEmailSender();
+    const actividadRepo = crearRepoActividadInvalida();
+    const inscripcionRepo = crearRepoInscripcion();
+    const service = new InscripcionService(emailSender, actividadRepo, inscripcionRepo);
+
+    await expect(
+      service.inscribir({
+        actividad: 'Kayak',
+        horario: '09:00',
+        visitantes: [{ nombre: 'Ana', dni: '12345678', edad: 22 }],
+        terminosAceptados: true,
+        emailContacto: 'ana@email.com',
+      }),
+    ).rejects.toThrow(ErrorActividadNoValida);
 
     expect(inscripcionRepo.save).not.toHaveBeenCalled();
     expect(emailSender.enviar).not.toHaveBeenCalled();

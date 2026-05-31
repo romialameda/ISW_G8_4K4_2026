@@ -1,4 +1,3 @@
-// InscripcionPage.jsx — Flujo de 4 pasos consumiendo la API del backend
 import { useState, useEffect } from 'react';
 import ActividadSelector from '../../components/ActividadSelector/ActividadSelector';
 import HorarioSelector from '../../components/HorarioSelector/HorarioSelector';
@@ -17,22 +16,21 @@ const PASOS = [
 
 const VISITANTE_VACIO = { nombre: '', dni: '', edad: '', talle: '' };
 
-// Mensajes amigables para errores de dominio del backend
 const ERROR_MENSAJES = {
-  ErrorSinCupos:             '❌ No hay cupos disponibles para el horario seleccionado.',
-  ErrorHorarioNoDisponible:  '❌ El horario seleccionado no está disponible o el parque está cerrado.',
-  ErrorTerminosNoAceptados:  '❌ Debés aceptar los términos y condiciones para continuar.',
-  ErrorTalleRequerido:       '❌ Esta actividad requiere ingresar el talle de vestimenta.',
-  ErrorActividadNoValida:    '❌ La actividad seleccionada no es válida.',
+  ErrorSinCupos: '❌ No hay cupos disponibles para el horario seleccionado.',
+  ErrorHorarioNoDisponible: '❌ El horario seleccionado no está disponible o el parque está cerrado.',
+  ErrorSinParticipantes: '❌ Debés indicar al menos una persona para realizar la inscripción.',
+  ErrorDatosVisitanteIncompletos: '❌ Cada visitante debe tener nombre, DNI y edad para completar la inscripción.',
+  ErrorTerminosNoAceptados: '❌ Debés aceptar los términos y condiciones para continuar.',
+  ErrorTalleRequerido: '❌ Esta actividad requiere ingresar el talle de vestimenta.',
+  ErrorActividadNoValida: '❌ La actividad seleccionada no es válida.',
 };
 
 export default function InscripcionPage() {
-  // ── Estado de datos del backend ──────────────────────────────────────────
   const [actividades, setActividades] = useState([]);
   const [cargandoActividades, setCargandoActividades] = useState(true);
   const [errorCarga, setErrorCarga] = useState('');
 
-  // ── Estado del formulario ────────────────────────────────────────────────
   const [paso, setPaso] = useState(1);
   const [actividadSel, setActividadSel] = useState(null);
   const [horarioSel, setHorarioSel] = useState('');
@@ -40,19 +38,16 @@ export default function InscripcionPage() {
   const [emailContacto, setEmailContacto] = useState('');
   const [terminosAceptados, setTerminosAceptados] = useState(false);
 
-  // ── Estado de UI ─────────────────────────────────────────────────────────
   const [error, setError] = useState('');
   const [cargando, setCargando] = useState(false);
   const [inscripcionConfirmada, setInscripcionConfirmada] = useState(null);
 
-  // ── Carga inicial: GET /api/actividades ───────────────────────────────────
   useEffect(() => {
     async function cargarActividades() {
       try {
         setCargandoActividades(true);
         setErrorCarga('');
         const data = await getActividades();
-        // Enriquecer con emojis y colores del frontend
         setActividades(enriquecerActividades(data));
       } catch (err) {
         setErrorCarga('No se pudo conectar con el servidor. Verificá que el backend esté corriendo.');
@@ -61,46 +56,69 @@ export default function InscripcionPage() {
         setCargandoActividades(false);
       }
     }
+
     cargarActividades();
   }, []);
 
-  // ── Validación por paso (cliente) ─────────────────────────────────────────
   const puedeAvanzar = () => {
     setError('');
+
     switch (paso) {
-      case 1: return !!actividadSel;
-      case 2: return !!horarioSel;
+      case 1:
+        return !!actividadSel;
+      case 2:
+        return !!horarioSel;
       case 3: {
         const faltaDato = visitantes.some(
-          v => !v.nombre || !v.dni || !v.edad ||
-               (actividadSel?.requiereTalle && !v.talle)
+          visitante =>
+            !visitante.nombre ||
+            !visitante.dni ||
+            !visitante.edad ||
+            (actividadSel?.requiereTalle && !visitante.talle)
         );
+
         if (faltaDato) {
-          setError('Completá todos los campos obligatorios.' +
-            (actividadSel?.requiereTalle ? ' El talle es obligatorio para esta actividad.' : ''));
+          setError(
+            'Completá todos los campos obligatorios.' +
+              (actividadSel?.requiereTalle ? ' El talle es obligatorio para esta actividad.' : '')
+          );
           return false;
         }
+
         if (!emailContacto || !emailContacto.includes('@')) {
           setError('Ingresá un email de contacto válido.');
           return false;
         }
+
         return true;
       }
-      case 4: return terminosAceptados;
-      default: return false;
+      case 4:
+        return terminosAceptados;
+      default:
+        return false;
     }
   };
 
-  const avanzar = () => { if (puedeAvanzar()) setPaso(p => p + 1); };
-  const retroceder = () => { setError(''); setPaso(p => p - 1); };
+  const avanzar = () => {
+    if (puedeAvanzar()) {
+      setPaso(pasoActual => pasoActual + 1);
+    }
+  };
 
-  // ── Confirmar → POST /api/inscripciones ───────────────────────────────────
+  const retroceder = () => {
+    setError('');
+    setPaso(pasoActual => pasoActual - 1);
+  };
+
   const confirmar = async () => {
-    if (!terminosAceptados) return;
+    if (!terminosAceptados) {
+      return;
+    }
+
     setError('');
     setCargando(true);
+
     try {
-      // Enviamos al backend real — la validación final es del servidor
       const resultado = await postInscripcion({
         actividad: actividadSel.nombre,
         horario: horarioSel,
@@ -118,30 +136,30 @@ export default function InscripcionPage() {
         emailContacto,
       });
 
-      // Actualizar localmente el cupo para feedback inmediato
-      setActividades(prevActividades => 
+      setActividades(prevActividades =>
         prevActividades.map(act => {
-          if (act.nombre === actividadSel.nombre) {
-            return {
-              ...act,
-              horarios: act.horarios.map(h => {
-                if (h.hora === horarioSel) {
-                  const nuevosCupos = Math.max(0, h.cuposDisponibles - visitantes.length);
-                  return {
-                    ...h,
-                    cuposDisponibles: nuevosCupos,
-                    disponible: h.activo && nuevosCupos > 0
-                  };
-                }
-                return h;
-              })
-            };
+          if (act.nombre !== actividadSel.nombre) {
+            return act;
           }
-          return act;
+
+          return {
+            ...act,
+            horarios: act.horarios.map(horario => {
+              if (horario.hora !== horarioSel) {
+                return horario;
+              }
+
+              const nuevosCupos = Math.max(0, horario.cuposDisponibles - visitantes.length);
+              return {
+                ...horario,
+                cuposDisponibles: nuevosCupos,
+                disponible: horario.activo && nuevosCupos > 0,
+              };
+            }),
+          };
         })
       );
 
-      // Recargar desde el servidor para estar 100% sincronizados
       try {
         const data = await getActividades();
         setActividades(enriquecerActividades(data));
@@ -149,14 +167,12 @@ export default function InscripcionPage() {
         console.error('[API] Error al refrescar actividades:', fetchErr);
       }
     } catch (err) {
-      // El backend devuelve err.name como el tipo de error de dominio
       setError(ERROR_MENSAJES[err.name] ?? `❌ ${err.message}`);
     } finally {
       setCargando(false);
     }
   };
 
-  // ── Reset ─────────────────────────────────────────────────────────────────
   const reiniciar = () => {
     setPaso(1);
     setActividadSel(null);
@@ -168,10 +184,12 @@ export default function InscripcionPage() {
     setInscripcionConfirmada(null);
   };
 
-  // ── Pantalla de carga ─────────────────────────────────────────────────────
   if (cargandoActividades) {
     return (
-      <div className="app" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+      <div
+        className="app"
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}
+      >
         <div style={{ textAlign: 'center' }}>
           <div className="spinner" style={{ width: 40, height: 40, margin: '0 auto 1rem', borderWidth: 3 }} />
           <p style={{ color: 'var(--text-secondary)' }}>Cargando actividades desde el servidor...</p>
@@ -180,10 +198,12 @@ export default function InscripcionPage() {
     );
   }
 
-  // ── Error de conexión ─────────────────────────────────────────────────────
   if (errorCarga) {
     return (
-      <div className="app" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+      <div
+        className="app"
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}
+      >
         <div className="card" style={{ maxWidth: 480, textAlign: 'center' }}>
           <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔌</div>
           <h2 style={{ marginBottom: '0.5rem' }}>Sin conexión al servidor</h2>
@@ -196,30 +216,27 @@ export default function InscripcionPage() {
     );
   }
 
-  // ── Render principal ──────────────────────────────────────────────────────
   return (
     <div className="app">
       <div className="container">
         <header className="header">
-          <div className="header-badge">🌿 Parque Natural — Reservas Online</div>
+          <div className="header-badge">🌿 Parque Natural - Reservas Online</div>
           <h1>Inscribite a una actividad</h1>
           <p>Completá el formulario para reservar tu lugar</p>
         </header>
 
-        {/* Progress Steps */}
         <nav className="steps" aria-label="Progreso del formulario">
-          {PASOS.map((p, i) => (
-            <div key={p.num} style={{ display: 'flex', alignItems: 'center' }}>
-              <div className={`step ${paso === p.num ? 'active' : ''} ${paso > p.num ? 'done' : ''}`}>
-                <span className="step-num">{paso > p.num ? '✓' : p.num}</span>
-                {p.label}
+          {PASOS.map((item, index) => (
+            <div key={item.num} style={{ display: 'flex', alignItems: 'center' }}>
+              <div className={`step ${paso === item.num ? 'active' : ''} ${paso > item.num ? 'done' : ''}`}>
+                <span className="step-num">{paso > item.num ? '✓' : item.num}</span>
+                {item.label}
               </div>
-              {i < PASOS.length - 1 && <div className="step-divider" />}
+              {index < PASOS.length - 1 && <div className="step-divider" />}
             </div>
           ))}
         </nav>
 
-        {/* Error alert */}
         {error && (
           <div className="alert alert-error" role="alert">
             <span className="alert-icon">⚠️</span>
@@ -227,20 +244,18 @@ export default function InscripcionPage() {
           </div>
         )}
 
-        {/* Paso 1: Actividad */}
         {paso === 1 && (
           <ActividadSelector
             actividades={actividades}
             seleccionada={actividadSel}
-            onSeleccionar={(act) => {
-              setActividadSel(act);
+            onSeleccionar={actividad => {
+              setActividadSel(actividad);
               setHorarioSel('');
               setTerminosAceptados(false);
             }}
           />
         )}
 
-        {/* Paso 2: Horario */}
         {paso === 2 && (
           <HorarioSelector
             actividad={actividadSel}
@@ -249,14 +264,9 @@ export default function InscripcionPage() {
           />
         )}
 
-        {/* Paso 3: Visitantes + Email */}
         {paso === 3 && (
           <>
-            <VisitanteForm
-              actividad={actividadSel}
-              visitantes={visitantes}
-              onChange={setVisitantes}
-            />
+            <VisitanteForm actividad={actividadSel} visitantes={visitantes} onChange={setVisitantes} />
             <div className="card">
               <h2 className="card-title">📧 Email de confirmación</h2>
               <p className="card-subtitle">Recibirás los detalles de tu inscripción en este email</p>
@@ -267,14 +277,13 @@ export default function InscripcionPage() {
                   type="email"
                   placeholder="Ej: nombre@email.com"
                   value={emailContacto}
-                  onChange={e => setEmailContacto(e.target.value)}
+                  onChange={event => setEmailContacto(event.target.value)}
                 />
               </div>
             </div>
           </>
         )}
 
-        {/* Paso 4: Términos y condiciones */}
         {paso === 4 && (
           <TerminosCondiciones
             actividad={actividadSel}
@@ -283,13 +292,14 @@ export default function InscripcionPage() {
           />
         )}
 
-        {/* Botones de navegación */}
         <div className="nav-buttons">
           {paso > 1 ? (
             <button id="btn-anterior" className="btn btn-secondary" onClick={retroceder}>
               ← Anterior
             </button>
-          ) : <div />}
+          ) : (
+            <div />
+          )}
 
           {paso < 4 ? (
             <button
@@ -307,20 +317,20 @@ export default function InscripcionPage() {
               onClick={confirmar}
               disabled={!terminosAceptados || cargando}
             >
-              {cargando
-                ? <><span className="spinner" /> Confirmando con el servidor...</>
-                : <>✓ Confirmar inscripción</>
-              }
+              {cargando ? (
+                <>
+                  <span className="spinner" /> Confirmando con el servidor...
+                </>
+              ) : (
+                <>✓ Confirmar inscripción</>
+              )}
             </button>
           )}
         </div>
       </div>
 
       {inscripcionConfirmada && (
-        <ConfirmacionModal
-          inscripcion={inscripcionConfirmada}
-          onCerrar={reiniciar}
-        />
+        <ConfirmacionModal inscripcion={inscripcionConfirmada} onCerrar={reiniciar} />
       )}
     </div>
   );

@@ -69,5 +69,23 @@ describe('Inscripcion — Modelo de dominio', () => {
       // ASSERT
       expect(inscripcion.confirmada).toBe(true);
     });
+
+    it('debe descontar cupos del horario segun la cantidad de visitantes', () => {
+      const horario = new Horario({ hora: '10:00', cuposDisponibles: 5, activo: true });
+      const inscripcion = new Inscripcion({
+        actividad: actividadFake,
+        horario,
+        visitantes: [
+          { nombre: 'Ana', dni: '12345678', edad: 25, talle: 'M' },
+          { nombre: 'Juan', dni: '87654321', edad: 27, talle: 'L' },
+        ],
+        terminosAceptados: true,
+        emailContacto: 'ana@email.com',
+      });
+
+      inscripcion.confirmar();
+
+      expect(horario.cuposDisponibles).toBe(3);
+    });
   });
 });
