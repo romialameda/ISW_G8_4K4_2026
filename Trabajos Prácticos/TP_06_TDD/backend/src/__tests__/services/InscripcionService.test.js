@@ -53,6 +53,7 @@ function crearRepoActividadInvalida() {
 }
 
 describe('InscripcionService.inscribir', () => {
+  // CP-01 — Registro exitoso con actividad que requiere vestimenta (pasa) 
   it('confirma la inscripcion, guarda y envia email en el happy path', async () => {
     const emailSender = crearEmailSender();
     const actividadRepo = crearRepoActividad({ nombre: 'Tirolesa', requiereTalle: true });
@@ -81,6 +82,7 @@ describe('InscripcionService.inscribir', () => {
     );
   });
 
+  // CP-02 — Sin cupos disponibles (falla) 
   it('lanza ErrorSinCupos cuando no hay cupos disponibles', async () => {
     const emailSender = crearEmailSender();
     const actividadRepo = crearRepoActividad({ cuposDisponibles: 0 });
@@ -101,6 +103,7 @@ describe('InscripcionService.inscribir', () => {
     expect(emailSender.enviar).not.toHaveBeenCalled();
   });
 
+  // CP-03 – Inscripción rechazada porque la cantidad supera los cupos disponibles
   it('lanza ErrorSinCupos cuando la cantidad de visitantes supera los cupos', async () => {
     const emailSender = crearEmailSender();
     const actividadRepo = crearRepoActividad({ cuposDisponibles: 2 });
@@ -122,6 +125,7 @@ describe('InscripcionService.inscribir', () => {
     ).rejects.toThrow(ErrorSinCupos);
   });
 
+  // CP-04 — Registro exitoso con actividad que no requiere talle
   it('permite inscribirse sin talle cuando la actividad no lo requiere', async () => {
     const emailSender = crearEmailSender();
     const actividadRepo = crearRepoActividad({ nombre: 'Safari', requiereTalle: false, hora: '11:00' });
@@ -160,6 +164,7 @@ describe('InscripcionService.inscribir', () => {
     expect(emailSender.enviar).not.toHaveBeenCalled();
   });
 
+  // CP-05 — Inscripción rechazada por horario inactivo o no disponible
   it('lanza ErrorHorarioNoDisponible cuando el horario no existe en la actividad', async () => {
     const emailSender = crearEmailSender();
     const actividadRepo = crearRepoActividad({ nombre: 'Tirolesa', hora: '12:00', cuposDisponibles: 10 });
@@ -180,6 +185,7 @@ describe('InscripcionService.inscribir', () => {
     expect(emailSender.enviar).not.toHaveBeenCalled();
   });
 
+  // CP-06 — Inscripción rechazada por no aceptar términos y condiciones
   it('lanza ErrorTerminosNoAceptados cuando no se aceptan los terminos', async () => {
     const emailSender = crearEmailSender();
     const actividadRepo = crearRepoActividad();
@@ -200,6 +206,7 @@ describe('InscripcionService.inscribir', () => {
     expect(emailSender.enviar).not.toHaveBeenCalled();
   });
 
+  // CP-07 — Inscripción rechazada por falta de talle requerido
   it('lanza ErrorTalleRequerido cuando falta el talle obligatorio', async () => {
     const emailSender = crearEmailSender();
     const actividadRepo = crearRepoActividad({ nombre: 'Tirolesa', requiereTalle: true });
@@ -220,6 +227,28 @@ describe('InscripcionService.inscribir', () => {
     expect(emailSender.enviar).not.toHaveBeenCalled();
   });
 
+  // CP-08 — Inscripción rechazada por actividad inválida
+  it('lanza ErrorActividadNoValida cuando la actividad no existe', async () => {
+    const emailSender = crearEmailSender();
+    const actividadRepo = crearRepoActividadInvalida();
+    const inscripcionRepo = crearRepoInscripcion();
+    const service = new InscripcionService(emailSender, actividadRepo, inscripcionRepo);
+
+    await expect(
+      service.inscribir({
+        actividad: 'Kayak',
+        horario: '09:00',
+        visitantes: [{ nombre: 'Ana', dni: '12345678', edad: 22 }],
+        terminosAceptados: true,
+        emailContacto: 'ana@email.com',
+      }),
+    ).rejects.toThrow(ErrorActividadNoValida);
+
+    expect(inscripcionRepo.save).not.toHaveBeenCalled();
+    expect(emailSender.enviar).not.toHaveBeenCalled();
+  });
+
+  // CP-09 — Inscripción rechazada por no indicar participantes
   it('lanza ErrorSinParticipantes cuando no se informa ningun visitante', async () => {
     const emailSender = crearEmailSender();
     const actividadRepo = crearRepoActividad({ nombre: 'Safari', requiereTalle: false, hora: '09:00' });
@@ -240,6 +269,7 @@ describe('InscripcionService.inscribir', () => {
     expect(emailSender.enviar).not.toHaveBeenCalled();
   });
 
+  // CP-10 — Inscripción rechazada por datos incompletos del visitante
   it('lanza ErrorDatosVisitanteIncompletos cuando falta nombre, dni o edad', async () => {
     const emailSender = crearEmailSender();
     const actividadRepo = crearRepoActividad({ nombre: 'Safari', requiereTalle: false, hora: '09:00' });
@@ -260,23 +290,22 @@ describe('InscripcionService.inscribir', () => {
     expect(emailSender.enviar).not.toHaveBeenCalled();
   });
 
-  it('lanza ErrorActividadNoValida cuando la actividad no existe', async () => {
+  // CP-11 — Registro exitoso con múltiples participantes sin talle requerido
+  it('permite inscribirse múltiples participantes sin talle cuando la actividad no lo requiere', async () => {
     const emailSender = crearEmailSender();
-    const actividadRepo = crearRepoActividadInvalida();
+    const actividadRepo = crearRepoActividad({ nombre: 'Safari', requiereTalle: false, hora: '11:00' });
     const inscripcionRepo = crearRepoInscripcion();
     const service = new InscripcionService(emailSender, actividadRepo, inscripcionRepo);
 
-    await expect(
-      service.inscribir({
-        actividad: 'Kayak',
-        horario: '09:00',
-        visitantes: [{ nombre: 'Ana', dni: '12345678', edad: 22 }],
-        terminosAceptados: true,
-        emailContacto: 'ana@email.com',
-      }),
-    ).rejects.toThrow(ErrorActividadNoValida);
+    const resultado = await service.inscribir({
+      actividad: 'Safari',
+      horario: '11:00',
+      visitantes: [{ nombre: 'Maria Lopez', dni: '55555555', edad: 35 }, { nombre: 'Ana Lopez', dni: '12345678', edad: 25 }],
+      terminosAceptados: true,
+      emailContacto: 'maria@email.com',
+    });
 
-    expect(inscripcionRepo.save).not.toHaveBeenCalled();
-    expect(emailSender.enviar).not.toHaveBeenCalled();
+    expect(resultado.confirmada).toBe(true);
+    expect(emailSender.enviar).toHaveBeenCalledTimes(1);
   });
 });
