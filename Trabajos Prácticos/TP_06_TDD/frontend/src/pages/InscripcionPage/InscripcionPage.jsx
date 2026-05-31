@@ -96,6 +96,7 @@ export default function InscripcionPage() {
 
   // ── Confirmar → POST /api/inscripciones ───────────────────────────────────
   const confirmar = async () => {
+    if (!terminosAceptados) return;
     setError('');
     setCargando(true);
     try {

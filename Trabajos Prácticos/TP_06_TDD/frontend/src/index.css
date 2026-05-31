@@ -582,10 +582,11 @@ body {
   box-shadow: 0 6px 24px rgba(99,102,241,0.45);
 }
 
-.btn-primary:disabled {
+.btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
+  box-shadow: none;
 }
 
 .btn-secondary {
