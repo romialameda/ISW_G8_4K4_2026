@@ -20,6 +20,7 @@ const DOMAIN_ERROR_HTTP = {
   ErrorDatosVisitanteIncompletos: 422,
   ErrorTerminosNoAceptados:  422,
   ErrorTalleRequerido:       422,
+  ErrorEdadInvalida:         422,
 };
 
 export class InscripcionController {

@@ -61,3 +61,12 @@ export class ErrorActividadNoValida extends Error {
     this.name = 'ErrorActividadNoValida';
   }
 }
+
+/** CA: "La edad de cada visitante debe estar entre 0 y 99 años" */
+export class ErrorEdadInvalida extends Error {
+  constructor() {
+    super('La edad de cada visitante debe estar entre 0 y 99 años.');
+    this.name = 'ErrorEdadInvalida';
+  }
+}
+

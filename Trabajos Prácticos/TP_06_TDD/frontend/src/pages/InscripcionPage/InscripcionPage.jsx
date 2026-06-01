@@ -24,6 +24,7 @@ const ERROR_MENSAJES = {
   ErrorTerminosNoAceptados: '❌ Debés aceptar los términos y condiciones para continuar.',
   ErrorTalleRequerido: '❌ Esta actividad requiere ingresar el talle de vestimenta.',
   ErrorActividadNoValida: '❌ La actividad seleccionada no es válida.',
+  ErrorEdadInvalida: '❌ La edad de cada visitante debe estar entre 0 y 99 años.',
 };
 
 export default function InscripcionPage() {
@@ -66,14 +67,30 @@ export default function InscripcionPage() {
     switch (paso) {
       case 1:
         return !!actividadSel;
-      case 2:
-        return !!horarioSel;
+      case 2: {
+        if (!horarioSel) return false;
+
+        const [hStr, mStr] = horarioSel.split(':');
+        const h = parseInt(hStr, 10);
+        const m = parseInt(mStr, 10);
+        const totalMinutos = h * 60 + m;
+        const minMinutos = 8 * 60 + 30; // 08:30 = 510
+        const maxMinutos = 19 * 60;     // 19:00 = 1140
+
+        if (totalMinutos < minMinutos || totalMinutos > maxMinutos) {
+          setError('El horario seleccionado está fuera del horario de apertura del parque (08:30 a 19:00).');
+          return false;
+        }
+        return true;
+      }
       case 3: {
         const faltaDato = visitantes.some(
           visitante =>
             !visitante.nombre ||
             !visitante.dni ||
-            !visitante.edad ||
+            visitante.edad === '' ||
+            visitante.edad === null ||
+            visitante.edad === undefined ||
             (actividadSel?.requiereTalle && !visitante.talle)
         );
 
@@ -82,6 +99,18 @@ export default function InscripcionPage() {
             'Completá todos los campos obligatorios.' +
               (actividadSel?.requiereTalle ? ' El talle es obligatorio para esta actividad.' : '')
           );
+          return false;
+        }
+
+        const edadInvalida = visitantes.some(
+          visitante => {
+            const edadNum = Number(visitante.edad);
+            return isNaN(edadNum) || edadNum < 0 || edadNum > 99;
+          }
+        );
+
+        if (edadInvalida) {
+          setError('La edad de cada visitante debe estar entre 0 y 99 años.');
           return false;
         }
 

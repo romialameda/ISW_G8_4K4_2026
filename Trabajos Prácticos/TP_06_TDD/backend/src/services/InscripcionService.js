@@ -16,6 +16,22 @@ import {
   ErrorActividadNoValida,
 } from '../errors/DomainErrors.js';
 
+function esHorarioParqueValido(hora) {
+  if (!hora || typeof hora !== 'string' || !hora.includes(':')) {
+    return false;
+  }
+  const [hStr, mStr] = hora.split(':');
+  const h = parseInt(hStr, 10);
+  const m = parseInt(mStr, 10);
+  if (isNaN(h) || isNaN(m)) {
+    return false;
+  }
+  const totalMinutos = h * 60 + m;
+  const minMinutos = 8 * 60 + 30; // 08:30 = 510
+  const maxMinutos = 19 * 60;     // 19:00 = 1140
+  return totalMinutos >= minMinutos && totalMinutos <= maxMinutos;
+}
+
 export class InscripcionService {
   /**
    * @param {object} emailSender          - Implementa enviar({ destinatario, actividad, ... })
@@ -52,7 +68,11 @@ export class InscripcionService {
       throw new ErrorActividadNoValida(nombreActividad);
     }
 
-    // ─── 2. Validar horario activo ────────────────────────────────────────
+    // ─── 2. Validar horario activo y rango del parque (08:30 - 19:00) ─────
+    if (!esHorarioParqueValido(horaSeleccionada)) {
+      throw new ErrorHorarioNoDisponible(horaSeleccionada);
+    }
+
     const horario = actividad.obtenerHorario(horaSeleccionada);
     if (!horario || !horario.estaActivo()) {
       throw new ErrorHorarioNoDisponible(horaSeleccionada);

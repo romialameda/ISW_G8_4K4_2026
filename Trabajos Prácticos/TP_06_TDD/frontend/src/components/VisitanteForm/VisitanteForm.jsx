@@ -75,7 +75,7 @@ export default function VisitanteForm({ actividad, visitantes, onChange }) {
                 type="number"
                 placeholder="Ej: 25"
                 value={visitante.edad}
-                min={1} max={120}
+                min={0} max={99}
                 onChange={e => actualizar(idx, 'edad', e.target.value)}
               />
             </div>

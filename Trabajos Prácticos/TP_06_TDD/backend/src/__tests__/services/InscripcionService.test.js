@@ -10,6 +10,7 @@ import {
   ErrorSinParticipantes,
   ErrorTalleRequerido,
   ErrorTerminosNoAceptados,
+  ErrorEdadInvalida,
 } from '../../errors/DomainErrors.js';
 
 function crearRepoActividad({
@@ -308,4 +309,163 @@ describe('InscripcionService.inscribir', () => {
     expect(resultado.confirmada).toBe(true);
     expect(emailSender.enviar).toHaveBeenCalledTimes(1);
   });
+
+  // CP-12 — Registro exitoso con edad del visitante en el límite inferior: 0
+  it('confirma la inscripción cuando el visitante tiene el límite inferior de edad: 0', async () => {
+    const emailSender = crearEmailSender();
+    const actividadRepo = crearRepoActividad({ nombre: 'Safari', requiereTalle: false, hora: '10:00' });
+    const inscripcionRepo = crearRepoInscripcion();
+    const service = new InscripcionService(emailSender, actividadRepo, inscripcionRepo);
+
+    const resultado = await service.inscribir({
+      actividad: 'Safari',
+      horario: '10:00',
+      visitantes: [{ nombre: 'Ana Garcia', dni: '12345678', edad: 0 }],
+      terminosAceptados: true,
+      emailContacto: 'ana@email.com',
+    });
+
+    expect(resultado.confirmada).toBe(true);
+  });
+
+  it('confirma la inscripción cuando el visitante tiene el límite superior de edad: 99', async () => {
+    const emailSender = crearEmailSender();
+    const actividadRepo = crearRepoActividad({ nombre: 'Safari', requiereTalle: false, hora: '10:00' });
+    const inscripcionRepo = crearRepoInscripcion();
+    const service = new InscripcionService(emailSender, actividadRepo, inscripcionRepo);
+
+    const resultado = await service.inscribir({
+      actividad: 'Safari',
+      horario: '10:00',
+      visitantes: [{ nombre: 'Ana Garcia', dni: '12345678', edad: 99 }],
+      terminosAceptados: true,
+      emailContacto: 'ana@email.com',
+    });
+
+    expect(resultado.confirmada).toBe(true);
+  });
+
+  // CP-12 — Registro rechazado por edad del visitante menor a 0
+  it('lanza ErrorEdadInvalida cuando la edad del visitante es menor a 0', async () => {
+    const emailSender = crearEmailSender();
+    const actividadRepo = crearRepoActividad({ nombre: 'Safari', requiereTalle: false, hora: '10:00' });
+    const inscripcionRepo = crearRepoInscripcion();
+    const service = new InscripcionService(emailSender, actividadRepo, inscripcionRepo);
+
+    await expect(
+      service.inscribir({
+        actividad: 'Safari',
+        horario: '10:00',
+        visitantes: [{ nombre: 'Ana Garcia', dni: '12345678', edad: -1 }],
+        terminosAceptados: true,
+        emailContacto: 'ana@email.com',
+      }),
+    ).rejects.toThrow(ErrorEdadInvalida);
+  });
+
+  // CP-12 — Registro rechazado por edad del visitante mayor a 99
+  it('lanza ErrorEdadInvalida cuando la edad del visitante es mayor a 99', async () => {
+    const emailSender = crearEmailSender();
+    const actividadRepo = crearRepoActividad({ nombre: 'Safari', requiereTalle: false, hora: '10:00' });
+    const inscripcionRepo = crearRepoInscripcion();
+    const service = new InscripcionService(emailSender, actividadRepo, inscripcionRepo);
+
+    await expect(
+      service.inscribir({
+        actividad: 'Safari',
+        horario: '10:00',
+        visitantes: [{ nombre: 'Ana Garcia', dni: '12345678', edad: 100 }],
+        terminosAceptados: true,
+        emailContacto: 'ana@email.com',
+      }),
+    ).rejects.toThrow(ErrorEdadInvalida);
+  });
+
+  // Pruebas TDD - Límites de horario del parque (08:30 a 19:00)
+  it('confirma la inscripción cuando el horario es el límite inferior: 08:30', async () => {
+    const emailSender = crearEmailSender();
+    const actividadRepo = crearRepoActividad({ nombre: 'Safari', requiereTalle: false, hora: '08:30' });
+    const inscripcionRepo = crearRepoInscripcion();
+    const service = new InscripcionService(emailSender, actividadRepo, inscripcionRepo);
+
+    const resultado = await service.inscribir({
+      actividad: 'Safari',
+      horario: '08:30',
+      visitantes: [{ nombre: 'Ana Garcia', dni: '12345678', edad: 25 }],
+      terminosAceptados: true,
+      emailContacto: 'ana@email.com',
+    });
+
+    expect(resultado.confirmada).toBe(true);
+  });
+
+  it('confirma la inscripción cuando el horario es el límite superior: 19:00', async () => {
+    const emailSender = crearEmailSender();
+    const actividadRepo = crearRepoActividad({ nombre: 'Safari', requiereTalle: false, hora: '19:00' });
+    const inscripcionRepo = crearRepoInscripcion();
+    const service = new InscripcionService(emailSender, actividadRepo, inscripcionRepo);
+
+    const resultado = await service.inscribir({
+      actividad: 'Safari',
+      horario: '19:00',
+      visitantes: [{ nombre: 'Ana Garcia', dni: '12345678', edad: 25 }],
+      terminosAceptados: true,
+      emailContacto: 'ana@email.com',
+    });
+
+    expect(resultado.confirmada).toBe(true);
+  });
+
+  // CP-13 — Registro rechazado por horario del parque menor al límite inferior: 08:29
+  it('lanza ErrorHorarioNoDisponible cuando el horario es menor al límite inferior: 08:29', async () => {
+    const emailSender = crearEmailSender();
+    const actividadRepo = crearRepoActividad({ nombre: 'Safari', requiereTalle: false, hora: '08:29' });
+    const inscripcionRepo = crearRepoInscripcion();
+    const service = new InscripcionService(emailSender, actividadRepo, inscripcionRepo);
+
+    await expect(
+      service.inscribir({
+        actividad: 'Safari',
+        horario: '08:29',
+        visitantes: [{ nombre: 'Ana Garcia', dni: '12345678', edad: 25 }],
+        terminosAceptados: true,
+        emailContacto: 'ana@email.com',
+      }),
+    ).rejects.toThrow(ErrorHorarioNoDisponible);
+  });
+
+  it('lanza ErrorHorarioNoDisponible cuando el horario es mayor al límite superior: 19:01', async () => {
+    const emailSender = crearEmailSender();
+    const actividadRepo = crearRepoActividad({ nombre: 'Safari', requiereTalle: false, hora: '19:01' });
+    const inscripcionRepo = crearRepoInscripcion();
+    const service = new InscripcionService(emailSender, actividadRepo, inscripcionRepo);
+
+    await expect(
+      service.inscribir({
+        actividad: 'Safari',
+        horario: '19:01',
+        visitantes: [{ nombre: 'Ana Garcia', dni: '12345678', edad: 25 }],
+        terminosAceptados: true,
+        emailContacto: 'ana@email.com',
+      }),
+    ).rejects.toThrow(ErrorHorarioNoDisponible);
+  });
+
+  it('confirma la inscripción en un horario intermedio válido: 12:00', async () => {
+    const emailSender = crearEmailSender();
+    const actividadRepo = crearRepoActividad({ nombre: 'Safari', requiereTalle: false, hora: '12:00' });
+    const inscripcionRepo = crearRepoInscripcion();
+    const service = new InscripcionService(emailSender, actividadRepo, inscripcionRepo);
+
+    const resultado = await service.inscribir({
+      actividad: 'Safari',
+      horario: '12:00',
+      visitantes: [{ nombre: 'Ana Garcia', dni: '12345678', edad: 25 }],
+      terminosAceptados: true,
+      emailContacto: 'ana@email.com',
+    });
+
+    expect(resultado.confirmada).toBe(true);
+  });
 });
+

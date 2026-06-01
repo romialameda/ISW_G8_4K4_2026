@@ -3,6 +3,7 @@ import { Visitante } from '../../models/Visitante.js';
 import {
   ErrorDatosVisitanteIncompletos,
   ErrorTalleRequerido,
+  ErrorEdadInvalida,
 } from '../../errors/DomainErrors.js';
 
 describe('Visitante', () => {
@@ -73,6 +74,34 @@ describe('Visitante', () => {
       const actividad = { requiereTalle: false, nombre: 'Safari' };
 
       expect(() => visitante.validarParaActividad(actividad)).toThrow(ErrorDatosVisitanteIncompletos);
+    });
+
+    it('pasa cuando la edad es el límite inferior: 0', () => {
+      const visitante = new Visitante({ nombre: 'Bebe', dni: '11111111', edad: 0 });
+      const actividad = { requiereTalle: false, nombre: 'Safari' };
+
+      expect(() => visitante.validarParaActividad(actividad)).not.toThrow();
+    });
+
+    it('pasa cuando la edad es el límite superior: 99', () => {
+      const visitante = new Visitante({ nombre: 'Anciano', dni: '11111111', edad: 99 });
+      const actividad = { requiereTalle: false, nombre: 'Safari' };
+
+      expect(() => visitante.validarParaActividad(actividad)).not.toThrow();
+    });
+
+    it('lanza ErrorEdadInvalida cuando la edad es menor al límite inferior: -1', () => {
+      const visitante = new Visitante({ nombre: 'Negativo', dni: '11111111', edad: -1 });
+      const actividad = { requiereTalle: false, nombre: 'Safari' };
+
+      expect(() => visitante.validarParaActividad(actividad)).toThrow(ErrorEdadInvalida);
+    });
+
+    it('lanza ErrorEdadInvalida cuando la edad es mayor al límite superior: 100', () => {
+      const visitante = new Visitante({ nombre: 'Centenario', dni: '11111111', edad: 100 });
+      const actividad = { requiereTalle: false, nombre: 'Safari' };
+
+      expect(() => visitante.validarParaActividad(actividad)).toThrow(ErrorEdadInvalida);
     });
   });
 });

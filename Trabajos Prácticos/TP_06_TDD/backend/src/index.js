@@ -7,6 +7,7 @@
  *  - Rutas REST bajo el prefijo /api
  *  - Manejo de errores centralizado
  */
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import actividadesRoutes from './routes/actividades.routes.js';
