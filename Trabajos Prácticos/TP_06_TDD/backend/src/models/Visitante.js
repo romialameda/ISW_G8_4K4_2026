@@ -5,6 +5,7 @@ import {
   ErrorDatosVisitanteIncompletos,
   ErrorTalleRequerido,
   ErrorEdadInvalida,
+  ErrorDniInvalido,
 } from '../errors/DomainErrors.js';
 
 export class Visitante {
@@ -29,6 +30,10 @@ export class Visitante {
     const edadNum = Number(this.edad);
     if (isNaN(edadNum) || edadNum < 0 || edadNum > 99) {
       throw new ErrorEdadInvalida();
+    }
+
+    if (!/^\d{7,8}$/.test(this.dni.trim())) {
+      throw new ErrorDniInvalido();
     }
 
     if (actividad.requiereTalle && !this.talle) {

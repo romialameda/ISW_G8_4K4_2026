@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 import 'dotenv/config';
+import { ErrorEmailInvalido } from '../errors/DomainErrors.js';
 
 export class EmailService {
   constructor() {
@@ -13,6 +14,10 @@ export class EmailService {
   }
 
   async enviar({ destinatario, actividad, horario, idInscripcion, visitantes }) {
+    if (!destinatario || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(destinatario)) {
+      throw new ErrorEmailInvalido();
+    }
+
     const listadoVisitantes = visitantes
       .map((v, i) => `${i + 1}. ${v.nombre} (DNI: ${v.dni}, Edad: ${v.edad}${v.talle ? `, Talle: ${v.talle}` : ''})`)
       .join('\n');

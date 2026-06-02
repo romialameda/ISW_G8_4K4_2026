@@ -22,7 +22,8 @@ export const SEED_ACTIVIDADES = [
       { hora: '10:00', cuposDisponibles: 10, activo: true },
       { hora: '12:00', cuposDisponibles: 10, activo: true },
       { hora: '14:00', cuposDisponibles: 5, activo: true },
-      { hora: '16:00', cuposDisponibles: 1, activo: true },
+      { hora: '16:00', cuposDisponibles: 2, activo: true },
+      { hora: '21:00', cuposDisponibles: 2, activo: true },
     ],
   },
   {

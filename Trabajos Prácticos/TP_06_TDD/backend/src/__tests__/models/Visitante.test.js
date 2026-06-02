@@ -4,6 +4,7 @@ import {
   ErrorDatosVisitanteIncompletos,
   ErrorTalleRequerido,
   ErrorEdadInvalida,
+  ErrorDniInvalido,
 } from '../../errors/DomainErrors.js';
 
 describe('Visitante', () => {
@@ -102,6 +103,48 @@ describe('Visitante', () => {
       const actividad = { requiereTalle: false, nombre: 'Safari' };
 
       expect(() => visitante.validarParaActividad(actividad)).toThrow(ErrorEdadInvalida);
+    });
+
+    it('pasa cuando el DNI tiene exactamente 7 dígitos', () => {
+      const visitante = new Visitante({ nombre: 'Juan', dni: '1234567', edad: 25 });
+      const actividad = { requiereTalle: false, nombre: 'Safari' };
+
+      expect(() => visitante.validarParaActividad(actividad)).not.toThrow();
+    });
+
+    it('pasa cuando el DNI tiene exactamente 8 dígitos', () => {
+      const visitante = new Visitante({ nombre: 'Juan', dni: '12345678', edad: 25 });
+      const actividad = { requiereTalle: false, nombre: 'Safari' };
+
+      expect(() => visitante.validarParaActividad(actividad)).not.toThrow();
+    });
+
+    it('lanza ErrorDniInvalido cuando el DNI tiene menos de 7 dígitos (ej: 6)', () => {
+      const visitante = new Visitante({ nombre: 'Juan', dni: '123456', edad: 25 });
+      const actividad = { requiereTalle: false, nombre: 'Safari' };
+
+      expect(() => visitante.validarParaActividad(actividad)).toThrow(ErrorDniInvalido);
+    });
+
+    it('lanza ErrorDniInvalido cuando el DNI tiene más de 8 dígitos (ej: 9)', () => {
+      const visitante = new Visitante({ nombre: 'Juan', dni: '123456789', edad: 25 });
+      const actividad = { requiereTalle: false, nombre: 'Safari' };
+
+      expect(() => visitante.validarParaActividad(actividad)).toThrow(ErrorDniInvalido);
+    });
+
+    it('lanza ErrorDniInvalido cuando el DNI contiene letras', () => {
+      const visitante = new Visitante({ nombre: 'Juan', dni: '1234567a', edad: 25 });
+      const actividad = { requiereTalle: false, nombre: 'Safari' };
+
+      expect(() => visitante.validarParaActividad(actividad)).toThrow(ErrorDniInvalido);
+    });
+
+    it('lanza ErrorDniInvalido cuando el DNI contiene puntos o caracteres especiales', () => {
+      const visitante = new Visitante({ nombre: 'Juan', dni: '12.345.678', edad: 25 });
+      const actividad = { requiereTalle: false, nombre: 'Safari' };
+
+      expect(() => visitante.validarParaActividad(actividad)).toThrow(ErrorDniInvalido);
     });
   });
 });

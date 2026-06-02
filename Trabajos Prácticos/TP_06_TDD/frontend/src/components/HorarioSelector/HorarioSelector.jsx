@@ -23,7 +23,7 @@ export default function HorarioSelector({ actividad, horarioSeleccionado, onSele
       <p className="card-subtitle">Los horarios tachados no tienen cupos o están cerrados</p>
       <div className="horarios-grid">
         {actividad.horarios.map(h => {
-          const isDisabled = !h.activo || h.cuposDisponibles === 0;
+          const isDisabled = !h.activo;
           return (
             <button
               key={h.hora}

@@ -1,30 +1,20 @@
 import { useState, useEffect } from 'react';
-import ActividadSelector from '../../components/ActividadSelector/ActividadSelector';
-import HorarioSelector from '../../components/HorarioSelector/HorarioSelector';
-import VisitanteForm from '../../components/VisitanteForm/VisitanteForm';
-import TerminosCondiciones from '../../components/TerminosCondiciones/TerminosCondiciones';
 import ConfirmacionModal from '../../components/ConfirmacionModal/ConfirmacionModal';
 import { getActividades, postInscripcion } from '../../services/api';
-import { enriquecerActividades } from '../../data/actividadesData';
-
-const PASOS = [
-  { num: 1, label: 'Actividad' },
-  { num: 2, label: 'Horario' },
-  { num: 3, label: 'Visitantes' },
-  { num: 4, label: 'Términos' },
-];
+import { enriquecerActividades, TALLES } from '../../data/actividadesData';
 
 const VISITANTE_VACIO = { nombre: '', dni: '', edad: '', talle: '' };
 
 const ERROR_MENSAJES = {
-  ErrorSinCupos: '❌ No hay cupos disponibles para el horario seleccionado.',
-  ErrorHorarioNoDisponible: '❌ El horario seleccionado no está disponible o el parque está cerrado.',
-  ErrorSinParticipantes: '❌ Debés indicar al menos una persona para realizar la inscripción.',
-  ErrorDatosVisitanteIncompletos: '❌ Cada visitante debe tener nombre, DNI y edad para completar la inscripción.',
-  ErrorTerminosNoAceptados: '❌ Debés aceptar los términos y condiciones para continuar.',
-  ErrorTalleRequerido: '❌ Esta actividad requiere ingresar el talle de vestimenta.',
-  ErrorActividadNoValida: '❌ La actividad seleccionada no es válida.',
-  ErrorEdadInvalida: '❌ La edad de cada visitante debe estar entre 0 y 99 años.',
+  ErrorSinCupos:                 '❌ No hay cupos disponibles para el horario seleccionado.',
+  ErrorHorarioNoDisponible:      '❌ El horario seleccionado no está disponible o el parque está cerrado.',
+  ErrorSinParticipantes:         '❌ Debés indicar al menos una persona para realizar la inscripción.',
+  ErrorDatosVisitanteIncompletos:'❌ Cada visitante debe tener nombre, DNI y edad.',
+  ErrorTerminosNoAceptados:      '❌ Debés aceptar los términos y condiciones para continuar.',
+  ErrorTalleRequerido:           '❌ Esta actividad requiere ingresar el talle de vestimenta.',
+  ErrorActividadNoValida:        '❌ La actividad seleccionada no es válida.',
+  ErrorEdadInvalida:             '❌ La edad de cada visitante debe estar entre 0 y 99 años.',
+  ErrorDniInvalido:              '❌ El DNI debe tener formato argentino (7 u 8 dígitos numéricos).',
 };
 
 export default function InscripcionPage() {
@@ -32,14 +22,15 @@ export default function InscripcionPage() {
   const [cargandoActividades, setCargandoActividades] = useState(true);
   const [errorCarga, setErrorCarga] = useState('');
 
-  const [paso, setPaso] = useState(1);
   const [actividadSel, setActividadSel] = useState(null);
   const [horarioSel, setHorarioSel] = useState('');
-  const [visitantes, setVisitantes] = useState([{ ...VISITANTE_VACIO }]);
+  const [cantidadVisitantes, setCantidadVisitantes] = useState(0);
+  const [visitantes, setVisitantes] = useState([]);
   const [emailContacto, setEmailContacto] = useState('');
   const [terminosAceptados, setTerminosAceptados] = useState(false);
 
-  const [error, setError] = useState('');
+  const [errores, setErrores] = useState({});
+  const [errorGlobal, setErrorGlobal] = useState('');
   const [cargando, setCargando] = useState(false);
   const [inscripcionConfirmada, setInscripcionConfirmada] = useState(null);
 
@@ -57,96 +48,111 @@ export default function InscripcionPage() {
         setCargandoActividades(false);
       }
     }
-
     cargarActividades();
   }, []);
 
-  const puedeAvanzar = () => {
-    setError('');
-
-    switch (paso) {
-      case 1:
-        return !!actividadSel;
-      case 2: {
-        if (!horarioSel) return false;
-
-        const [hStr, mStr] = horarioSel.split(':');
-        const h = parseInt(hStr, 10);
-        const m = parseInt(mStr, 10);
-        const totalMinutos = h * 60 + m;
-        const minMinutos = 8 * 60 + 30; // 08:30 = 510
-        const maxMinutos = 19 * 60;     // 19:00 = 1140
-
-        if (totalMinutos < minMinutos || totalMinutos > maxMinutos) {
-          setError('El horario seleccionado está fuera del horario de apertura del parque (08:30 a 19:00).');
-          return false;
-        }
-        return true;
+  // ── Visitantes ──────────────────────────────────────────────────────────────
+  const cambiarCantidadVisitantes = (nuevaCantidad) => {
+    const n = Math.max(0, Math.min(10, Number(nuevaCantidad)));
+    if (isNaN(n)) return;
+    setCantidadVisitantes(n);
+    setVisitantes(prev => {
+      if (n > prev.length) {
+        return [...prev, ...Array(n - prev.length).fill(null).map(() => ({ ...VISITANTE_VACIO }))];
       }
-      case 3: {
-        const faltaDato = visitantes.some(
-          visitante =>
-            !visitante.nombre ||
-            !visitante.dni ||
-            visitante.edad === '' ||
-            visitante.edad === null ||
-            visitante.edad === undefined ||
-            (actividadSel?.requiereTalle && !visitante.talle)
-        );
-
-        if (faltaDato) {
-          setError(
-            'Completá todos los campos obligatorios.' +
-              (actividadSel?.requiereTalle ? ' El talle es obligatorio para esta actividad.' : '')
-          );
-          return false;
+      return prev.slice(0, n);
+    });
+    // Limpiar errores de visitantes que ya no existen
+    setErrores(e => {
+      const nuevo = { ...e };
+      Object.keys(nuevo).forEach(k => {
+        if (k.startsWith('visitante_')) {
+          const idx = parseInt(k.split('_')[1], 10);
+          if (idx >= n) delete nuevo[k];
         }
+      });
+      return nuevo;
+    });
+  };
 
-        const edadInvalida = visitantes.some(
-          visitante => {
-            const edadNum = Number(visitante.edad);
-            return isNaN(edadNum) || edadNum < 0 || edadNum > 99;
-          }
-        );
+  const actualizarVisitante = (idx, campo, valor) => {
+    setVisitantes(v => v.map((vis, i) => i === idx ? { ...vis, [campo]: valor } : vis));
+    // Limpiar error puntual al editar
+    setErrores(e => { const n = { ...e }; delete n[`visitante_${idx}_${campo}`]; return n; });
+  };
 
-        if (edadInvalida) {
-          setError('La edad de cada visitante debe estar entre 0 y 99 años.');
-          return false;
-        }
+  // ── Validación ──────────────────────────────────────────────────────────────
+  const validar = () => {
+    const errs = {};
 
-        if (!emailContacto || !emailContacto.includes('@')) {
-          setError('Ingresá un email de contacto válido.');
-          return false;
-        }
+    if (!actividadSel) {
+      errs.actividad = 'Seleccioná una actividad.';
+    }
 
-        return true;
+    if (!horarioSel) {
+      errs.horario = 'Seleccioná un horario.';
+    } else {
+      const [h, m] = horarioSel.split(':').map(Number);
+      const total = h * 60 + m;
+      if (total < 510 || total > 1140) { // 08:30 = 510, 19:00 = 1140
+        errs.horario = 'El horario debe estar entre 08:30 y 19:00.';
       }
-      case 4:
-        return terminosAceptados;
-      default:
-        return false;
     }
-  };
 
-  const avanzar = () => {
-    if (puedeAvanzar()) {
-      setPaso(pasoActual => pasoActual + 1);
+    visitantes.forEach((v, idx) => {
+      if (!v.nombre?.trim()) errs[`visitante_${idx}_nombre`] = 'Nombre requerido.';
+      if (!v.dni?.trim()) {
+        errs[`visitante_${idx}_dni`] = 'DNI requerido.';
+      } else if (!/^\d{7,8}$/.test(v.dni.trim())) {
+        errs[`visitante_${idx}_dni`] = 'DNI debe tener 7 o 8 dígitos.';
+      }
+
+      if (v.edad === '' || v.edad === null || v.edad === undefined) {
+        errs[`visitante_${idx}_edad`] = 'Edad requerida.';
+      } else {
+        const edadNum = Number(v.edad);
+        if (isNaN(edadNum) || edadNum < 0 || edadNum > 99) {
+          errs[`visitante_${idx}_edad`] = 'Edad debe ser entre 0 y 99.';
+        }
+      }
+
+      if (actividadSel?.requiereTalle && !v.talle) {
+        errs[`visitante_${idx}_talle`] = 'Talle requerido para esta actividad.';
+      }
+    });
+
+    if (!emailContacto || !emailContacto.includes('@')) {
+      errs.email = 'Ingresá un email de contacto válido.';
     }
-  };
 
-  const retroceder = () => {
-    setError('');
-    setPaso(pasoActual => pasoActual - 1);
-  };
-
-  const confirmar = async () => {
     if (!terminosAceptados) {
+      errs.terminos = 'Debés aceptar los términos y condiciones.';
+    }
+
+    return errs;
+  };
+
+  // ── Confirmación ─────────────────────────────────────────────────────────────
+  const confirmar = async () => {
+    setErrorGlobal('');
+    const errs = validar();
+
+    if (errs.horario === 'El horario debe estar entre 08:30 y 19:00.') {
+      setErrorGlobal('⚠️ El horario debe estar entre 08:30 y 19:00.');
+      errs.horario = '';
+    }
+
+    if (Object.keys(errs).length > 0) {
+      setErrores(errs);
+      // Scroll al primer error
+      const firstKey = Object.keys(errs)[0];
+      const el = document.getElementById(`field-${firstKey}`);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
 
-    setError('');
+    setErrores({});
     setCargando(true);
-
     try {
       const resultado = await postInscripcion({
         actividad: actividadSel.nombre,
@@ -165,63 +171,37 @@ export default function InscripcionPage() {
         emailContacto,
       });
 
-      setActividades(prevActividades =>
-        prevActividades.map(act => {
-          if (act.nombre !== actividadSel.nombre) {
-            return act;
-          }
-
-          return {
-            ...act,
-            horarios: act.horarios.map(horario => {
-              if (horario.hora !== horarioSel) {
-                return horario;
-              }
-
-              const nuevosCupos = Math.max(0, horario.cuposDisponibles - visitantes.length);
-              return {
-                ...horario,
-                cuposDisponibles: nuevosCupos,
-                disponible: horario.activo && nuevosCupos > 0,
-              };
-            }),
-          };
-        })
-      );
-
       try {
         const data = await getActividades();
         setActividades(enriquecerActividades(data));
-      } catch (fetchErr) {
-        console.error('[API] Error al refrescar actividades:', fetchErr);
-      }
+      } catch { /* ignorar error de refresco */ }
     } catch (err) {
-      setError(ERROR_MENSAJES[err.name] ?? `❌ ${err.message}`);
+      setErrorGlobal(ERROR_MENSAJES[err.name] ?? `❌ ${err.message}`);
     } finally {
       setCargando(false);
     }
   };
 
+  // ── Reiniciar ────────────────────────────────────────────────────────────────
   const reiniciar = () => {
-    setPaso(1);
     setActividadSel(null);
     setHorarioSel('');
-    setVisitantes([{ ...VISITANTE_VACIO }]);
+    setCantidadVisitantes(0);
+    setVisitantes([]);
     setEmailContacto('');
     setTerminosAceptados(false);
-    setError('');
+    setErrores({});
+    setErrorGlobal('');
     setInscripcionConfirmada(null);
   };
 
+  // ── Loading / Error de carga ─────────────────────────────────────────────────
   if (cargandoActividades) {
     return (
-      <div
-        className="app"
-        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}
-      >
-        <div style={{ textAlign: 'center' }}>
-          <div className="spinner" style={{ width: 40, height: 40, margin: '0 auto 1rem', borderWidth: 3 }} />
-          <p style={{ color: 'var(--text-secondary)' }}>Cargando actividades desde el servidor...</p>
+      <div className="app" style={{ display:'flex', alignItems:'center', justifyContent:'center', minHeight:'100vh' }}>
+        <div style={{ textAlign:'center' }}>
+          <div className="spinner" style={{ width:40, height:40, margin:'0 auto 1rem', borderWidth:3 }} />
+          <p style={{ color:'var(--text-secondary)' }}>Cargando actividades...</p>
         </div>
       </div>
     );
@@ -229,135 +209,337 @@ export default function InscripcionPage() {
 
   if (errorCarga) {
     return (
-      <div
-        className="app"
-        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}
-      >
-        <div className="card" style={{ maxWidth: 480, textAlign: 'center' }}>
-          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔌</div>
-          <h2 style={{ marginBottom: '0.5rem' }}>Sin conexión al servidor</h2>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>{errorCarga}</p>
-          <button className="btn btn-primary" onClick={() => window.location.reload()}>
-            Reintentar
-          </button>
+      <div className="app" style={{ display:'flex', alignItems:'center', justifyContent:'center', minHeight:'100vh' }}>
+        <div className="card" style={{ maxWidth:480, textAlign:'center' }}>
+          <div style={{ fontSize:'3rem', marginBottom:'1rem' }}>🔌</div>
+          <h2 style={{ marginBottom:'0.5rem' }}>Sin conexión al servidor</h2>
+          <p style={{ color:'var(--text-secondary)', marginBottom:'1.5rem' }}>{errorCarga}</p>
+          <button className="btn btn-primary" onClick={() => window.location.reload()}>Reintentar</button>
         </div>
       </div>
     );
   }
 
+  const actividadSeleccionada = actividadSel;
+  const horariosDisponibles = actividadSeleccionada?.horarios ?? [];
+
   return (
     <div className="app">
       <div className="container">
+        {/* ── Header ──────────────────────────────────────── */}
         <header className="header">
-          <div className="header-badge">🌿 Parque Natural - Reservas Online</div>
+          <div className="header-badge">🌿 EcoHarmony Park — Reservas Online</div>
           <h1>Inscribite a una actividad</h1>
-          <p>Completá el formulario para reservar tu lugar</p>
+          <p>Completá el formulario y confirmá tu inscripción</p>
         </header>
 
-        <nav className="steps" aria-label="Progreso del formulario">
-          {PASOS.map((item, index) => (
-            <div key={item.num} style={{ display: 'flex', alignItems: 'center' }}>
-              <div className={`step ${paso === item.num ? 'active' : ''} ${paso > item.num ? 'done' : ''}`}>
-                <span className="step-num">{paso > item.num ? '✓' : item.num}</span>
-                {item.label}
+        {/* ════════════════════════════════════════════════════
+            SECCIÓN 1 — ACTIVIDAD
+            ════════════════════════════════════════════════ */}
+        <section className="card" id="field-actividad">
+          <h2 className="card-title">🎯 1. Elegí una actividad</h2>
+          <p className="card-subtitle">Solo se muestran actividades disponibles</p>
+          <div className="actividades-grid">
+            {actividades.map(act => {
+              const tieneAlgunCupo = act.horarios.some(h => h.disponible);
+              return (
+                <button
+                  key={act.nombre}
+                  id={`actividad-${act.nombre.toLowerCase().replace('í','i')}`}
+                  className={`actividad-card ${actividadSel?.nombre === act.nombre ? 'selected' : ''}`}
+                  style={{ '--act-color': act.color, opacity: tieneAlgunCupo ? 1 : 0.55 }}
+                  onClick={() => {
+                    if (!tieneAlgunCupo) return;
+                    setActividadSel(act);
+                    setHorarioSel('');
+                    setErrores(e => { const n={...e}; delete n.actividad; delete n.horario; return n; });
+                  }}
+                  disabled={!tieneAlgunCupo}
+                  title={!tieneAlgunCupo ? 'Sin cupos disponibles' : act.descripcion}
+                >
+                  <span className="actividad-emoji">{act.emoji}</span>
+                  <div className="actividad-nombre">{act.nombre}</div>
+                  <div className="actividad-desc">{act.descripcion}</div>
+                  <span className={`actividad-badge ${act.requiereTalle ? 'requiere' : ''}`}>
+                    {act.requiereTalle ? '👕 Requiere talle' : '✓ Sin talle'}
+                  </span>
+                  {!tieneAlgunCupo && (
+                    <div style={{ marginTop:'0.5rem', fontSize:'0.7rem', color:'var(--danger)', fontWeight:700 }}>
+                      Sin cupos disponibles
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          {errores.actividad && <p className="field-error" style={{ marginTop:'0.75rem' }}>⚠️ {errores.actividad}</p>}
+        </section>
+
+        {/* ════════════════════════════════════════════════════
+            SECCIÓN 2 — HORARIO
+            ════════════════════════════════════════════════ */}
+        <section className="card" id="field-horario">
+          <h2 className="card-title">🕙 2. Seleccioná un horario</h2>
+          <p className="card-subtitle">
+            {actividadSel
+              ? `Horarios disponibles para ${actividadSel.nombre}`
+              : 'Primero seleccioná una actividad para ver sus horarios'}
+          </p>
+          {actividadSel ? (
+            <div className="horarios-grid">
+              {horariosDisponibles.map(h => {
+                const isDisabled = !h.activo;
+                const getCuposClass = (c) => c === 0 ? 'sin-cupo' : c <= 3 ? 'pocos' : 'ok';
+                const getCuposLabel = (c, a) => !a ? 'No disponible' : c === 0 ? 'Sin cupos' : c === 1 ? '1 cupo' : `${c} cupos`;
+                return (
+                  <button
+                    key={h.hora}
+                    id={`horario-${h.hora.replace(':','')}`}
+                    className={`horario-btn ${horarioSel === h.hora ? 'selected' : ''}`}
+                    onClick={() => {
+                      if (isDisabled) return;
+                      setHorarioSel(h.hora);
+                      setErrores(e => { const n={...e}; delete n.horario; return n; });
+                    }}
+                    disabled={isDisabled}
+                  >
+                    <span className="horario-hora">{h.hora}</span>
+                    <span className={`horario-cupos ${getCuposClass(h.cuposDisponibles)}`}>
+                      {getCuposLabel(h.cuposDisponibles, h.activo)}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="horario-placeholder">
+              <span>🗓️</span>
+              <p>Los horarios aparecerán aquí una vez que elijas una actividad</p>
+            </div>
+          )}
+          {errores.horario && <p className="field-error" style={{ marginTop:'0.75rem' }}>⚠️ {errores.horario}</p>}
+        </section>
+
+        {/* ════════════════════════════════════════════════════
+            SECCIÓN 3 — VISITANTES
+            ════════════════════════════════════════════════ */}
+        <section className="card">
+          <h2 className="card-title">👥 3. Datos de los visitantes</h2>
+          <p className="card-subtitle">
+            {actividadSel?.requiereTalle
+              ? '⚠️ Esta actividad requiere ingresar el talle de vestimenta'
+              : actividadSel
+                ? '✓ Esta actividad no requiere talle de vestimenta'
+                : 'Indicá cuántas personas asistirán y completá sus datos'}
+          </p>
+
+          {/* Selector de cantidad */}
+          <div className="cantidad-visitantes-row">
+            <div className="field" id="field-cantidadVisitantes">
+              <label htmlFor="cantidad-visitantes">¿Cuántas personas van a asistir? *</label>
+              <div className="cantidad-visitantes-control">
+                <button
+                  type="button"
+                  id="btn-menos-visitantes"
+                  className="cantidad-btn"
+                  onClick={() => cambiarCantidadVisitantes(cantidadVisitantes - 1)}
+                  disabled={cantidadVisitantes <= 0}
+                  aria-label="Restar visitante"
+                >−</button>
+                <input
+                  id="cantidad-visitantes"
+                  type="number"
+                  min={0}
+                  max={10}
+                  value={cantidadVisitantes}
+                  onChange={e => cambiarCantidadVisitantes(e.target.value)}
+                  className="cantidad-input"
+                />
+                <button
+                  type="button"
+                  id="btn-mas-visitantes"
+                  className="cantidad-btn"
+                  onClick={() => cambiarCantidadVisitantes(cantidadVisitantes + 1)}
+                  disabled={cantidadVisitantes >= 10}
+                  aria-label="Sumar visitante"
+                >＋</button>
+                <span className="cantidad-label">
+                  {cantidadVisitantes === 1 ? '1 persona' : `${cantidadVisitantes} personas`}
+                </span>
               </div>
-              {index < PASOS.length - 1 && <div className="step-divider" />}
+            </div>
+          </div>
+
+          {/* Campos por visitante */}
+          {visitantes.map((visitante, idx) => (
+            <div key={idx} className="visitante-block">
+              <div className="visitante-block-title">
+                <span>👤</span> Visitante {idx + 1}
+              </div>
+
+              <div className="form-grid cols-3">
+                <div className="field" id={`field-visitante_${idx}_nombre`}>
+                  <label htmlFor={`nombre-${idx}`}>Nombre completo *</label>
+                  <input
+                    id={`nombre-${idx}`}
+                    type="text"
+                    placeholder="Ej: Ana García"
+                    value={visitante.nombre}
+                    onChange={e => actualizarVisitante(idx, 'nombre', e.target.value)}
+                    className={errores[`visitante_${idx}_nombre`] ? 'error' : ''}
+                  />
+                  {errores[`visitante_${idx}_nombre`] && (
+                    <span className="field-error">{errores[`visitante_${idx}_nombre`]}</span>
+                  )}
+                </div>
+
+                <div className="field" id={`field-visitante_${idx}_dni`}>
+                  <label htmlFor={`dni-${idx}`}>DNI *</label>
+                  <input
+                    id={`dni-${idx}`}
+                    type="text"
+                    placeholder="Ej: 12345678"
+                    value={visitante.dni}
+                    onChange={e => actualizarVisitante(idx, 'dni', e.target.value.replace(/\D/g, ''))}
+                    maxLength={8}
+                    className={errores[`visitante_${idx}_dni`] ? 'error' : ''}
+                  />
+                  {errores[`visitante_${idx}_dni`] && (
+                    <span className="field-error">{errores[`visitante_${idx}_dni`]}</span>
+                  )}
+                </div>
+
+                <div className="field" id={`field-visitante_${idx}_edad`}>
+                  <label htmlFor={`edad-${idx}`}>Edad * (0–99)</label>
+                  <input
+                    id={`edad-${idx}`}
+                    type="number"
+                    placeholder="Ej: 25"
+                    value={visitante.edad}
+                    min={0} max={99}
+                    onChange={e => actualizarVisitante(idx, 'edad', e.target.value)}
+                    className={errores[`visitante_${idx}_edad`] ? 'error' : ''}
+                  />
+                  {errores[`visitante_${idx}_edad`] && (
+                    <span className="field-error">{errores[`visitante_${idx}_edad`]}</span>
+                  )}
+                </div>
+              </div>
+              <div className="form-grid" style={{ marginTop:'1rem' }}>
+                <div className="field" id={`field-visitante_${idx}_talle`}>
+                  <label htmlFor={`talle-${idx}`}>
+                    {actividadSel?.requiereTalle ? 'Talle de vestimenta *' : 'Talle de vestimenta (opcional)'}
+                  </label>
+                  <select
+                    id={`talle-${idx}`}
+                    value={visitante.talle}
+                    onChange={e => actualizarVisitante(idx, 'talle', e.target.value)}
+                    className={errores[`visitante_${idx}_talle`] ? 'error' : ''}
+                  >
+                    <option value="">Seleccioná un talle</option>
+                    {TALLES.map(t => <option key={t} value={t}>{t}</option>)}
+                  </select>
+                  {errores[`visitante_${idx}_talle`] && (
+                    <span className="field-error">{errores[`visitante_${idx}_talle`]}</span>
+                  )}
+                </div>
+              </div>
             </div>
           ))}
-        </nav>
+        </section>
 
-        {error && (
-          <div className="alert alert-error" role="alert">
-            <span className="alert-icon">⚠️</span>
-            <span>{error}</span>
+        {/* ════════════════════════════════════════════════════
+            SECCIÓN 4 — EMAIL DE CONTACTO
+            ════════════════════════════════════════════════ */}
+        <section className="card" id="field-email">
+          <h2 className="card-title">📧 4. Email de confirmación</h2>
+          <p className="card-subtitle">Recibirás los detalles de tu inscripción en este email</p>
+          <div className="field">
+            <label htmlFor="email-contacto">Email de contacto *</label>
+            <input
+              id="email-contacto"
+              type="email"
+              placeholder="Ej: nombre@email.com"
+              value={emailContacto}
+              onChange={e => {
+                setEmailContacto(e.target.value);
+                setErrores(err => { const n={...err}; delete n.email; return n; });
+              }}
+              className={errores.email ? 'error' : ''}
+              style={{ maxWidth: 400 }}
+            />
+            {errores.email && <span className="field-error">{errores.email}</span>}
           </div>
-        )}
+        </section>
 
-        {paso === 1 && (
-          <ActividadSelector
-            actividades={actividades}
-            seleccionada={actividadSel}
-            onSeleccionar={actividad => {
-              setActividadSel(actividad);
-              setHorarioSel('');
-              setTerminosAceptados(false);
-            }}
-          />
-        )}
-
-        {paso === 2 && (
-          <HorarioSelector
-            actividad={actividadSel}
-            horarioSeleccionado={horarioSel}
-            onSeleccionar={setHorarioSel}
-          />
-        )}
-
-        {paso === 3 && (
-          <>
-            <VisitanteForm actividad={actividadSel} visitantes={visitantes} onChange={setVisitantes} />
-            <div className="card">
-              <h2 className="card-title">📧 Email de confirmación</h2>
-              <p className="card-subtitle">Recibirás los detalles de tu inscripción en este email</p>
-              <div className="field">
-                <label htmlFor="email-contacto">Email de contacto *</label>
-                <input
-                  id="email-contacto"
-                  type="email"
-                  placeholder="Ej: nombre@email.com"
-                  value={emailContacto}
-                  onChange={event => setEmailContacto(event.target.value)}
-                />
-              </div>
+        {/* ════════════════════════════════════════════════════
+            SECCIÓN 5 — TÉRMINOS Y CONDICIONES
+            ════════════════════════════════════════════════ */}
+        {actividadSel && (
+          <section className="card" id="field-terminos">
+            <h2 className="card-title">📋 5. Términos y condiciones</h2>
+            <p className="card-subtitle">
+              Leé los términos específicos de <strong>{actividadSel.nombre}</strong> antes de confirmar
+            </p>
+            <div className="terminos-box" id="terminos-texto">
+              {actividadSel.terminosYCondiciones}
             </div>
-          </>
+            <label
+              className={`terminos-check ${terminosAceptados ? 'checked' : ''} ${errores.terminos ? 'error-check' : ''}`}
+              id="label-terminos"
+              htmlFor="checkbox-terminos"
+            >
+              <input
+                type="checkbox"
+                id="checkbox-terminos"
+                checked={terminosAceptados}
+                onChange={e => {
+                  setTerminosAceptados(e.target.checked);
+                  setErrores(err => { const n={...err}; delete n.terminos; return n; });
+                }}
+              />
+              <span className="check-visual">{terminosAceptados ? '✓' : ''}</span>
+              <span className="terminos-check-text">
+                Acepto los términos y condiciones de <strong>{actividadSel.nombre}</strong>
+              </span>
+            </label>
+            {errores.terminos && <p className="field-error" style={{ marginTop:'0.5rem' }}>⚠️ {errores.terminos}</p>}
+          </section>
         )}
 
-        {paso === 4 && (
-          <TerminosCondiciones
-            actividad={actividadSel}
-            aceptado={terminosAceptados}
-            onCambiar={setTerminosAceptados}
-          />
-        )}
-
-        <div className="nav-buttons">
-          {paso > 1 ? (
-            <button id="btn-anterior" className="btn btn-secondary" onClick={retroceder}>
-              ← Anterior
-            </button>
-          ) : (
-            <div />
-          )}
-
-          {paso < 4 ? (
-            <button
-              id="btn-siguiente"
-              className="btn btn-primary"
-              onClick={avanzar}
-              disabled={paso === 1 && !actividadSel}
-            >
-              Siguiente →
-            </button>
-          ) : (
-            <button
-              id="btn-confirmar"
-              className="btn btn-success btn-lg"
-              onClick={confirmar}
-              disabled={!terminosAceptados || cargando}
-            >
-              {cargando ? (
-                <>
-                  <span className="spinner" /> Confirmando con el servidor...
-                </>
-              ) : (
-                <>✓ Confirmar inscripción</>
-              )}
-            </button>
-          )}
+        {/* ════════════════════════════════════════════════════
+            BOTÓN CONFIRMAR
+            ════════════════════════════════════════════════ */}
+        <div className="nav-buttons" style={{ justifyContent:'flex-end', borderTop:'none', paddingBottom:'3rem' }}>
+          <button
+            id="btn-confirmar"
+            className="btn btn-success btn-lg"
+            onClick={confirmar}
+            disabled={cargando}
+          >
+            {cargando ? (
+              <><span className="spinner" /> Confirmando con el servidor...</>
+            ) : (
+              <>✓ Confirmar inscripción</>
+            )}
+          </button>
         </div>
       </div>
 
+      {/* ── Toast de error global (fixed) ──────────────── */}
+      {errorGlobal && (
+        <div className="toast-error" role="alert">
+          <span className="toast-icon">⚠️</span>
+          <span className="toast-msg">{errorGlobal}</span>
+          <button
+            className="toast-close"
+            onClick={() => setErrorGlobal('')}
+            aria-label="Cerrar error"
+          >×</button>
+        </div>
+      )}
+
+      {/* ── Modal de confirmación ──────────────────────────── */}
       {inscripcionConfirmada && (
         <ConfirmacionModal inscripcion={inscripcionConfirmada} onCerrar={reiniciar} />
       )}

@@ -11,6 +11,8 @@ import {
   ErrorTalleRequerido,
   ErrorTerminosNoAceptados,
   ErrorEdadInvalida,
+  ErrorDniInvalido,
+  ErrorEmailInvalido,
 } from '../../errors/DomainErrors.js';
 
 function crearRepoActividad({
@@ -228,7 +230,25 @@ describe('InscripcionService.inscribir', () => {
     expect(emailSender.enviar).not.toHaveBeenCalled();
   });
 
-  // CP-08 — Inscripción rechazada por actividad inválida
+  // CP-08 — DNI con formato invalido (falla)
+  it('lanza ErrorDniInvalido cuando el DNI del visitante no es válido', async () => {
+    const emailSender = crearEmailSender();
+    const actividadRepo = crearRepoActividad({ nombre: 'Safari', requiereTalle: false, hora: '12:00' });
+    const inscripcionRepo = crearRepoInscripcion();
+    const service = new InscripcionService(emailSender, actividadRepo, inscripcionRepo);
+
+    await expect(
+      service.inscribir({
+        actividad: 'Safari',
+        horario: '12:00',
+        visitantes: [{ nombre: 'Ana Garcia', dni: '12345', edad: 25 }],
+        terminosAceptados: true,
+        emailContacto: 'ana@email.com',
+      }),
+    ).rejects.toThrow(ErrorDniInvalido);
+  });
+
+  // Test por actividad no válida
   it('lanza ErrorActividadNoValida cuando la actividad no existe', async () => {
     const emailSender = crearEmailSender();
     const actividadRepo = crearRepoActividadInvalida();
@@ -270,7 +290,25 @@ describe('InscripcionService.inscribir', () => {
     expect(emailSender.enviar).not.toHaveBeenCalled();
   });
 
-  // CP-10 — Inscripción rechazada por datos incompletos del visitante
+  // CP-10 — Inscripción rechazada por formato de email de contacto inválido (falla)
+  it('lanza ErrorEmailInvalido cuando el email de contacto no es válido', async () => {
+    const emailSender = crearEmailSender();
+    const actividadRepo = crearRepoActividad({ nombre: 'Safari', requiereTalle: false, hora: '12:00' });
+    const inscripcionRepo = crearRepoInscripcion();
+    const service = new InscripcionService(emailSender, actividadRepo, inscripcionRepo);
+
+    await expect(
+      service.inscribir({
+        actividad: 'Safari',
+        horario: '12:00',
+        visitantes: [{ nombre: 'Ana Garcia', dni: '12345678', edad: 25 }],
+        terminosAceptados: true,
+        emailContacto: 'correo-invalido',
+      }),
+    ).rejects.toThrow(ErrorEmailInvalido);
+  });
+
+  // Inscripción rechazada por datos incompletos del visitante
   it('lanza ErrorDatosVisitanteIncompletos cuando falta nombre, dni o edad', async () => {
     const emailSender = crearEmailSender();
     const actividadRepo = crearRepoActividad({ nombre: 'Safari', requiereTalle: false, hora: '09:00' });
@@ -345,7 +383,7 @@ describe('InscripcionService.inscribir', () => {
     expect(resultado.confirmada).toBe(true);
   });
 
-  // CP-12 — Registro rechazado por edad del visitante menor a 0
+  // CP-12 — Registro rechazado por edad del visitante menor a 0 
   it('lanza ErrorEdadInvalida cuando la edad del visitante es menor a 0', async () => {
     const emailSender = crearEmailSender();
     const actividadRepo = crearRepoActividad({ nombre: 'Safari', requiereTalle: false, hora: '10:00' });
@@ -363,7 +401,7 @@ describe('InscripcionService.inscribir', () => {
     ).rejects.toThrow(ErrorEdadInvalida);
   });
 
-  // CP-12 — Registro rechazado por edad del visitante mayor a 99
+  // CP-12 — Registro rechazado por edad del visitante mayor a 99 
   it('lanza ErrorEdadInvalida cuando la edad del visitante es mayor a 99', async () => {
     const emailSender = crearEmailSender();
     const actividadRepo = crearRepoActividad({ nombre: 'Safari', requiereTalle: false, hora: '10:00' });
@@ -416,7 +454,7 @@ describe('InscripcionService.inscribir', () => {
     expect(resultado.confirmada).toBe(true);
   });
 
-  // CP-13 — Registro rechazado por horario del parque menor al límite inferior: 08:29
+  // CP-13 — Registro rechazado por horario del parque menor al límite inferior: 08:29 (No implementado en interfaz)
   it('lanza ErrorHorarioNoDisponible cuando el horario es menor al límite inferior: 08:29', async () => {
     const emailSender = crearEmailSender();
     const actividadRepo = crearRepoActividad({ nombre: 'Safari', requiereTalle: false, hora: '08:29' });
@@ -467,5 +505,7 @@ describe('InscripcionService.inscribir', () => {
 
     expect(resultado.confirmada).toBe(true);
   });
+
+
 });
 

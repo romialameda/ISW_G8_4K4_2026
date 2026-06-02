@@ -14,6 +14,7 @@ import {
   ErrorSinParticipantes,
   ErrorTerminosNoAceptados,
   ErrorActividadNoValida,
+  ErrorEmailInvalido,
 } from '../errors/DomainErrors.js';
 
 function esHorarioParqueValido(hora) {
@@ -86,6 +87,11 @@ export class InscripcionService {
     // ─── 4. Validar T&C ───────────────────────────────────────────────────
     if (!terminosAceptados) {
       throw new ErrorTerminosNoAceptados();
+    }
+
+    // ─── 4.5. Validar formato de email ────────────────────────────────────
+    if (!emailContacto || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailContacto)) {
+      throw new ErrorEmailInvalido();
     }
 
     // ─── 5. Crear y validar visitantes ────────────────────────────────────

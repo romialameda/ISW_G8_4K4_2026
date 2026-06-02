@@ -70,3 +70,19 @@ export class ErrorEdadInvalida extends Error {
   }
 }
 
+/** Criterio: El DNI debe cumplir con el formato de un DNI argentino (7 u 8 dígitos numéricos) */
+export class ErrorDniInvalido extends Error {
+  constructor() {
+    super('El DNI debe tener formato argentino (7 u 8 dígitos numéricos).');
+    this.name = 'ErrorDniInvalido';
+  }
+}
+
+/** Criterio: El email debe ser un formato de email válido */
+export class ErrorEmailInvalido extends Error {
+  constructor() {
+    super('El email ingresado no es válido.');
+    this.name = 'ErrorEmailInvalido';
+  }
+}
+

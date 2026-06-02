@@ -473,6 +473,66 @@ body {
   background: rgba(106,153,78,0.06);
 }
 
+/* ── Cantidad visitantes ─────────────────────────────────── */
+.cantidad-visitantes-row {
+  margin-bottom: 1.5rem;
+}
+
+.cantidad-visitantes-control {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.cantidad-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background: rgba(106,153,78,0.12);
+  border: 1.5px solid rgba(106,153,78,0.3);
+  color: var(--green-dark);
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+  flex-shrink: 0;
+  font-family: inherit;
+}
+
+.cantidad-btn:hover:not(:disabled) {
+  background: rgba(106,153,78,0.25);
+  border-color: var(--accent);
+}
+
+.cantidad-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.cantidad-input {
+  width: 60px !important;
+  text-align: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+  padding: 0.45rem 0.5rem !important;
+  -moz-appearance: textfield;
+}
+
+.cantidad-input::-webkit-inner-spin-button,
+.cantidad-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.cantidad-label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 700;
+}
+
 /* ── Terms ───────────────────────────────────────────────── */
 .terminos-box {
   background: var(--bg-secondary);
@@ -533,7 +593,7 @@ body {
   color: var(--text-primary);
 }
 
-/* ── Error Alert ─────────────────────────────────────────── */
+/* ── Error Alert (inline, por si se reutiliza) ───────────── */
 .alert {
   display: flex;
   align-items: flex-start;
@@ -553,6 +613,53 @@ body {
 }
 
 .alert-icon { font-size: 1rem; flex-shrink: 0; margin-top: 0.05rem; }
+
+/* ── Toast de error global (fixed, siempre visible) ─────── */
+.toast-error {
+  position: fixed;
+  top: 1.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.9rem 1.25rem 0.9rem 1rem;
+  border-radius: var(--radius-md);
+  background: #fff0f0;
+  border: 1.5px solid rgba(188,71,73,0.4);
+  color: var(--red);
+  font-size: 0.9rem;
+  font-weight: 700;
+  box-shadow: 0 8px 32px rgba(188,71,73,0.18);
+  max-width: min(90vw, 600px);
+  width: max-content;
+  animation: toastSlideDown 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+.toast-icon { font-size: 1.1rem; flex-shrink: 0; }
+
+.toast-msg { flex: 1; line-height: 1.4; }
+
+.toast-close {
+  background: none;
+  border: none;
+  color: var(--red);
+  font-size: 1.3rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 0.2rem;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+
+.toast-close:hover { opacity: 1; }
+
+@keyframes toastSlideDown {
+  from { opacity: 0; transform: translateX(-50%) translateY(-16px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
 
 /* ── Navigation Buttons ──────────────────────────────────── */
 .nav-buttons {
@@ -718,3 +825,27 @@ body {
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
+
+/* ── Horario placeholder ──────────────────────────────────── */
+.horario-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 2rem 1rem;
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.horario-placeholder span { font-size: 2rem; }
+
+/* ── Error state para el bloque de términos ──────────────── */
+.terminos-check.error-check {
+  border-color: var(--danger);
+  background: rgba(188,71,73,0.05);
+}
+
