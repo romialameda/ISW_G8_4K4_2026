@@ -63,7 +63,7 @@ Esta separacion permitio ubicar las validaciones criticas del negocio en backend
 
 ## 5. Estrategia TDD aplicada
 
-Se siguio el enfoque **Red - Green - Refactor** de la siguiente manera:
+Se trabajó tomando como referencia el enfoque **Red - Green - Refactor** de la siguiente manera:
 
 ### Red
 
@@ -98,6 +98,18 @@ Una vez estabilizados los tests, se mejoro la organizacion del codigo mediante:
 - definicion de errores de dominio especificos
 - encapsulamiento de reglas del negocio dentro del dominio
 - desacople del servicio de email
+
+### Observacion sobre la trazabilidad en Git
+
+Luego de la devolucion del trabajo, se identifico que el historial de commits del repositorio no refleja de forma explicita y separada el ciclo `red -> green -> refactor`.
+
+Si bien durante el desarrollo se incorporaron pruebas, implementacion y ajustes sucesivos, varios commits agrupan cambios de test, codigo productivo y refactorizacion en un mismo paso. Por ese motivo, la traza historica no permite demostrar con claridad cada iteracion TDD de manera aislada.
+
+Como mejora de proceso para futuros trabajos, se adopta el criterio de versionar por separado:
+
+- incorporacion del test que falla
+- implementacion minima para hacerlo pasar
+- refactorizacion posterior con tests en verde
 
 ## 6. Decisiones de diseno
 
