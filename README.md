@@ -35,11 +35,11 @@ ISW_G8_4K4_2026
 │   │   ├── 02_Entrega/
 │   │   └── 03_Retroalimentacion/
 │   ├── TP_05_SCM_Uso_Repositorio/
-│       ├── 00_Enunciado/
-│       ├── 01_Produccion/
-│       ├── 02_Entrega/
-│       ├── 03_Retroalimentacion/
-│       └── 04_Evidencias_Repositorio/
+│   │   ├── 00_Enunciado/
+│   │   ├── 01_Produccion/
+│   │   ├── 02_Entrega/
+│   │   ├── 03_Retroalimentacion/
+│   │   └── 04_Evidencias_Repositorio/
 │   └── TP_06_TDD/
 │       ├── 00_Enunciado/
 │       ├── 01_Produccion/
