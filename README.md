@@ -34,9 +34,16 @@ ISW_G8_4K4_2026
 │   │   ├── 01_Produccion/
 │   │   ├── 02_Entrega/
 │   │   └── 03_Retroalimentacion/
-│   └── TP_05_SCM_Uso_Repositorio/
+│   ├── TP_05_SCM_Uso_Repositorio/
 │       ├── 00_Enunciado/
 │       ├── 01_Produccion/
+│       ├── 02_Entrega/
+│       ├── 03_Retroalimentacion/
+│       └── 04_Evidencias_Repositorio/
+│   └── TP_06_TDD/
+│       ├── 00_Enunciado/
+│       ├── 01_Produccion/
+│       │   └── Codigo_Fuente/
 │       ├── 02_Entrega/
 │       ├── 03_Retroalimentacion/
 │       └── 04_Evidencias_Repositorio/
@@ -90,6 +97,7 @@ Todos los directorios `TP_<NN>_<Tema>/` deben seguir esta estructura:
 - `02_Entrega/`: versión final entregada.
 - `03_Retroalimentacion/`: corrección o devolución recibida.
 - `04_Evidencias_Repositorio/`: capturas, reportes o evidencia de commits, updates, tags y líneas base cuando el TP lo requiera.
+- Si un TP incluye código fuente, este se ubica dentro de `01_Produccion/Codigo_Fuente/`.
 
 Si un TP no necesita una de las carpetas, la estructura igual se conserva para mantener consistencia y escalabilidad.
 

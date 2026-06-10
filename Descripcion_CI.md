@@ -14,3 +14,4 @@
 | CI-10 | README.md | Archivo | Documento de gestión | v1.1 | López Mora, Francisco | Activo | `/` | `.md` | Documento principal con la estructura del repositorio, reglas de nombrado y criterio de línea base. |
 | CI-11 | Descripcion_CI.md | Archivo | Documento de gestión | v1.1 | López Mora, Francisco | Activo | `/` | `.md` | Tabla de ítems de configuración bajo control en el repositorio. |
 | CI-12 | Trabajos Prácticos/README.md | Archivo | Documento de gestión | v1.0 | Peveraro, Fabrizio | Activo | `Trabajos Prácticos/` | `.md` | Define la estructura interna común que debe seguir cada TP del repositorio. |
+| CI-13 | TP_06_TDD | Directorio | Material propio | v1.0 | Bergero, Christian Javier | Activo | `Trabajos Prácticos/TP_06_TDD/` | No aplica | Estructura, código fuente y artefactos asociados al trabajo práctico 6. |

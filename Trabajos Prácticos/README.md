@@ -9,6 +9,7 @@ Cada trabajo práctico del repositorio debe almacenarse en un directorio con for
 - `02_Entrega/`: versión final presentada.
 - `03_Retroalimentacion/`: devoluciones, correcciones o capturas asociadas a la revisión.
 - `04_Evidencias_Repositorio/`: evidencia de commits, updates, tags o líneas base cuando aplique.
+- Si el TP requiere implementación o prototipos ejecutables, el código fuente se almacena dentro de `01_Produccion/Codigo_Fuente/`.
 
 ## Reglas de uso
 
